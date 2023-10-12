@@ -1,12 +1,10 @@
-use flowlab_lib::device::{Device, TCP};
+use flowlab_lib::device::{Device, Protocols, TCP};
+use flowlab_lib::parser::parse;
+use std::path::Path;
 
 #[tokio::main]
 async fn main() {
-    let device = Device::<TCP>::new(
-        "device1",
-        std::net::IpAddr::V4(std::net::Ipv4Addr::new(192, 168, 1, 2)),
-        5000,
-    );
-
-    print!("{:#?}", device)
+    let device_path = Path::new("../config/devices/devices.yaml");
+    let devices: Vec<Device<Protocols>> = parse(device_path).await.unwrap();
+    println!("{:#?}", devices);
 }
