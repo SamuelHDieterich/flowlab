@@ -1,0 +1,12 @@
+- name: device1
+  protocol:
+    ip: 127.0.0.1
+    port: 1234
+  instruction:
+    - scpi
+- name: device2
+  protocol:
+    ip: 127.0.0.1
+    port: 1234
+  instruction:
+    - scpi
