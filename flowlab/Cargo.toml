@@ -1,0 +1,13 @@
+[package]
+name = "flowlab"
+version = "0.1.0"
+edition = "2021"
+repository = "https://github.com/SamuelHDieterich/flowlab"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[workspace]
+
+[dependencies]
+flowlab-lib = { path = "../flowlab-lib", features = ["full"] }
+tokio = { version = "1.33.0", features = ["full"] }
