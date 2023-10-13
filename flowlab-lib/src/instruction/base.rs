@@ -60,3 +60,11 @@ pub struct Response {
 pub fn default_data_type() -> String {
     "string".to_string()
 }
+
+/// Get an instruction from a vector of instructions by its name
+pub fn find_instruction_with_name<'a>(
+    instructions: &'a Vec<Instruction>,
+    name: &str,
+) -> Option<&'a Instruction> {
+    instructions.iter().find(|&i| i.name == name)
+}

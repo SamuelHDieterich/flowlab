@@ -11,6 +11,7 @@ async-trait = "0.1.73"
 serde = { version = "1.0.188", features = ["derive"] }
 serde_with = "3.3.0"
 serde_yaml = "0.9.25"
+tera = { version = "1.19.1", default-features = false }
 tokio = { version = "1.33.0", features = ["net", "io-util", "fs"] }
 
 [features]
