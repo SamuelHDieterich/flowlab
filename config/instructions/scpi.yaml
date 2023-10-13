@@ -3,7 +3,7 @@
   alias:
     - Device information
   command:
-    query: *IDN?
+    query: "*IDN?"
   response:
     - attribute: manufacturer
       type: string
@@ -15,8 +15,8 @@
       type: string
     - attribute: build number
       type: integer
-  description: The *IDN? query returns the manufacturer, model number, serial number, and firmware version of the device.
+  description: Returns the manufacturer, model number, serial number, and firmware version of the device.
 - instruction: Reset the device
   command:
-    query: *RST
+    query: "*RST"
   description: Reset the instrument. Depending on the instrument, this may reset the device to a known state or reboot the device.
