@@ -5,6 +5,8 @@
 |  __/ (_| | |  \__ \  __/ |
 |_|   \__,_|_|  |___/\___|_|
 
+The parser module is used to read/write YAML files and parse them into generic data structures.
+
 */
 
 // Serde

@@ -5,7 +5,7 @@
   | || |___|  __/
   |_| \____|_|
 
-TCP Protocol implementation
+TCP Protocol implementation.
 
 */
 

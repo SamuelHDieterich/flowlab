@@ -1,6 +1,19 @@
+/*
+ ____
+| __ )  __ _ ___  ___
+|  _ \ / _` / __|/ _ \
+| |_) | (_| \__ \  __/
+|____/ \__,_|___/\___|
+
+This submodule has the building blocks to build instructions defined in YAML files.
+
+*/
+
+// Serde: Serialization/Deserialization framework
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
+/// The Instruction struct is used to define the instructions that a device can perform.
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Instruction {
@@ -13,6 +26,7 @@ pub struct Instruction {
     pub description: Option<String>,
 }
 
+/// The Command struct is used to define the command that a device can perform.
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Command {
@@ -20,6 +34,7 @@ pub struct Command {
     pub parameters: Option<Vec<Parameters>>,
 }
 
+/// The Parameters struct is used to define the parameters that a command can take.
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Parameters {
@@ -31,6 +46,7 @@ pub struct Parameters {
     pub description: Option<String>,
 }
 
+/// The Response struct is used to define the response that a command can return.
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Response {

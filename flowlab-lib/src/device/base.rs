@@ -5,7 +5,7 @@
 | |_) | (_| \__ \  __/
 |____/ \__,_|___/\___|
 
-Base building blocks for creating devices with generic protocols
+Base building blocks for creating devices with generic protocols.
 
 */
 
@@ -30,6 +30,6 @@ pub struct Device<Protocol> {
 /// This trait allows the device to send commands and receive responses
 #[async_trait]
 pub trait Query {
-    /// Send a command to the device and return the response (if any)
+    /// Send a command to the device and return the response (if any).
     async fn query(&self, command: &str) -> Result<Option<String>, std::io::Error>;
 }
