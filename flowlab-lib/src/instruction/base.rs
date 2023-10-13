@@ -62,6 +62,7 @@ pub fn default_data_type() -> String {
 }
 
 /// Get an instruction from a vector of instructions by its name
+#[tracing::instrument]
 pub fn find_instruction_with_name<'a>(
     instructions: &'a Vec<Instruction>,
     name: &str,

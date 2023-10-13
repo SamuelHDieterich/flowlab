@@ -11,3 +11,5 @@ repository = "https://github.com/SamuelHDieterich/flowlab"
 [dependencies]
 flowlab-lib = { path = "../flowlab-lib", features = ["full"] }
 tokio = { version = "1.33.0", features = ["full"] }
+tracing = "0.1.37"
+tracing-subscriber = "0.3.17"

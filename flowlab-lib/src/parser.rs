@@ -17,14 +17,21 @@ use std::path::Path;
 use tokio::fs::File;
 use tokio::io::{self, AsyncReadExt};
 
+// Tracing: Logging framework
+use tracing::debug;
+
 /// Read a file and return its contents as a string
-pub async fn read_file(path: impl AsRef<Path>) -> io::Result<String> {
+#[tracing::instrument]
+pub async fn read_file(path: impl AsRef<Path> + std::fmt::Debug) -> io::Result<String> {
     // Open the file
+    debug!("Reading file");
     let mut file = File::open(path).await?;
     // Buffer to store the file contents
     let mut contents = String::new();
     // Read the file into the buffer
     file.read_to_string(&mut contents).await?;
+    debug!("File read");
+    // Return the contents
     Ok(contents)
 }
 
@@ -51,11 +58,17 @@ impl From<serde_yaml::Error> for ParserError {
 }
 
 /// Parse a YAML file into a generic data structure
-pub async fn parse<T>(path: impl AsRef<Path>) -> Result<T, ParserError>
+#[tracing::instrument]
+pub async fn parse<T>(path: impl AsRef<Path> + std::fmt::Debug) -> Result<T, ParserError>
 where
-    T: for<'de> Deserialize<'de>,
+    T: for<'de> Deserialize<'de> + std::fmt::Debug,
 {
+    debug!("Reading file");
     let contents = read_file(path).await?;
+    debug!(
+        "Parsing file contents to type {T}",
+        T = std::any::type_name::<T>()
+    );
     let parsed: T = serde_yaml::from_str(&contents)?;
     Ok(parsed)
 }
