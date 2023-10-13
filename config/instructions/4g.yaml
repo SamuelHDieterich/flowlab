@@ -15,7 +15,7 @@
   alias:
     - Set module
   command:
-    query: CHAN {module}
+    query: CHAN {{module}}
     parameters:
       - name: module
         type: integer
@@ -27,7 +27,7 @@
   alias:
     - Set error response mode
   command:
-    query: ERROR {mode}
+    query: ERROR {{mode}}
     parameters:
       - name: mode
         type: integer
@@ -71,7 +71,7 @@
   prelude:
     - Select units
   command:
-    query: IMAG {value}
+    query: IMAG {{value}}
     example: IMAG 87.9350
     parameters:
       - name: value
@@ -98,7 +98,7 @@
   alias:
     - Set current sweep lower limit
   command:
-    query: LLIM {limit}
+    query: LLIM {{limit}}
     parameters:
       - name: limit
         type: float
@@ -108,7 +108,7 @@
   alias:
     - Set units
   command:
-    query: UNITS {units}
+    query: UNITS {{units}}
     parameters:
       - name: units
         type: string

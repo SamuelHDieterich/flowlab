@@ -5,7 +5,7 @@
   prelude:
     - Set display units
   command:
-    query: "INPUT {channel}:TEMPERATURE?"
+    query: "INPUT {{channel}}:TEMPERATURE?"
     parameters:
       - name: channel
         type: string
@@ -16,7 +16,7 @@
   description: Reports the current temperature reading on any of the input channels.
 - instruction: Set display units
   command:
-    query: "INPUT {channel}:UNITS {units}"
+    query: "INPUT {{channel}}:UNITS {{units}}"
     parameters:
       - name: channel
         type: string
@@ -35,7 +35,7 @@
   alias:
     - Query display units
   command:
-    query: "INPUT {channel}:UNITS?"
+    query: "INPUT {{channel}}:UNITS?"
     parameters:
       - name: channel
         type: string
