@@ -1,0 +1,119 @@
+# 3_Model 4G Instruction Manual - Rev 9_0.pdf
+- instruction: Query the currently selected module
+  alias:
+    - Get module
+  command:
+    query: CHAN?
+  response:
+    - attribute: module
+      type: integer
+      values:
+        - 1
+        - 2 
+  description: Returns the power module currently selected for remote commands. It returns 1 or 2. A command error is returned if only one module is installed.
+- instruction: Set the module for subsequent remote commands
+  alias:
+    - Set module
+  command:
+    query: CHAN {module}
+    parameters:
+      - name: module
+        type: integer
+        values:
+          - 1
+          - 2
+  description: Selects the module for subsequent remote commands. A command error is returned if only one module is installed.
+- instruction: Set error response mode for USB interface
+  alias:
+    - Set error response mode
+  command:
+    query: ERROR {mode}
+    parameters:
+      - name: mode
+        type: integer
+        values:
+          - 0
+          - 1
+        description: 0 = disable error reporting, 1 = enable error reporting
+  description: Enables or disables error messages when the USB interface is used. It is much easier to handle errors under program control when using the USB interface if error messages are disabled, but it is desirable to enable error messages if a terminal program is used to interactively control and query the 4G.
+- instruction: Query error response mode
+  alias:
+    - Get error response mode
+  command:
+    query: ERROR?
+  response:
+    - attribute: mode
+      type: integer
+      values:
+        - 0
+        - 1
+      description: 0 = disable error reporting, 1 = enable error reporting
+  description: Returns the selected error reporting mode.
+- instruction: Query magnet current (or magnetic field strength)
+  alias:
+    - Get magnet current
+    - Get magnetic field strength
+  command:
+    query: IMAG?
+  response:
+    - attribute: magnet current
+      type: float
+    - attribute: units
+      type: string
+      values:
+        - A
+        - G
+  description: Returns the magnet current (or magnetic field strength) in the present units. If the persistent switch heater is ON the magnet current returned will be the same as the power supply output current. If the persistent switch heater is off, the magnet current will be the value of the power supply output current when the persistent switch heater was last turned off. The magnet current will be set to zero if the power supply detects a quench.
+- instruction: Set the magnet current (or magnetic field strength).
+  alias:
+    - Set magnet current
+    - Set magnetic field strength
+  prelude:
+    - Select units
+  command:
+    query: IMAG {value}
+    example: IMAG 87.9350
+    parameters:
+      - name: value
+        type: float
+        default: 0.0
+  description: The IMAG command sets the magnet current shown on the display. The supply must be in standby or a command error will be returned. The value must be supplied in the selected units - amperes or field (kG). If Shim Mode is enabled, the persistent mode current displayed for the named shim is set if the shim parameter is provided.
+- instruction: Query power supply output current
+  alias:
+    - Get power supply output current
+  prelude:
+    - Select units
+  command:
+    query: IOUT?
+  response:
+    - attribute: output current
+      type: float
+    - attribute: units
+      type: string
+      values:
+        - A
+        - G
+  description: Returns the power supply output current (or magnetic field strength) in the present units.
+- instruction: Set current sweep lower limit
+  alias:
+    - Set current sweep lower limit
+  command:
+    query: LLIM {limit}
+    parameters:
+      - name: limit
+        type: float
+        default: 0.0
+  description: Sets the current limit used when the next SWEEP DOWN command is issued. The value must be supplied in the selected units - amperes or field (kG). An error will be returned if this value is greater than the upper sweep limit.
+- instruction: Select units
+  alias:
+    - Set units
+  command:
+    query: UNITS {units}
+    parameters:
+      - name: units
+        type: string
+        values:
+          - A
+          - G
+        default: G
+  description: Sets the units to be used for all input and display operations. Units may be set to Amps or Gauss. The unit will autorange to display Gauss, Kilogauss or Tesla.

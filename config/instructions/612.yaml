@@ -1,0 +1,51 @@
+# Cryomagnetics, Cryogenic Temperature Monitor - Models 612 and 612
+- instruction: Get temperature
+  alias:
+    - Query temperature
+  prelude:
+    - Set display units
+  command:
+    query: "INPUT {channel}:TEMPERATURE?"
+    parameters:
+      - name: channel
+        type: string
+        description: "The channel identification, options include: number (example: 0), characther (example: A), or channel ID (example: CHA)." 
+  response:
+    - attribute: temperature
+      type: float
+  description: Reports the current temperature reading on any of the input channels.
+- instruction: Set display units
+  command:
+    query: "INPUT {channel}:UNITS {units}"
+    parameters:
+      - name: channel
+        type: string
+        description: "The channel identification, options include: number (example: 0), characther (example: A), or channel ID (example: CHA)." 
+      - name: units
+        type: string
+        values:
+          - K
+          - C
+          - F
+          - S
+        default: K
+        description: "The units to display the temperature in, options include: K (Kelvin), C (Celsius), F (Fahrenheit), or S (primitive sensor units, Volts or Ohms)." 
+  description: Sets the display units of temperature used by the specific input channel.
+- instruction: Get display units
+  alias:
+    - Query display units
+  command:
+    query: "INPUT {channel}:UNITS?"
+    parameters:
+      - name: channel
+        type: string
+        description: "The channel identification, options include: number (example: 0), characther (example: A), or channel ID (example: CHA)." 
+  response:
+    - attribute: units
+      type: string
+      values:
+        - K
+        - C
+        - F
+        - S
+  description: Reports the display units of temperature used by the specific input channel.
