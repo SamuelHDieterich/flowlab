@@ -53,7 +53,21 @@ async fn test_parse_instructions() {
         parser::parse("../config/instructions/scpi.yaml")
             .await
             .unwrap();
-    assert_eq!(instructions[0].command.query, "*IDN?");
+    let instruction_reset_device = instruction::Instruction {
+        name: "Reset the device".to_string(),
+        alias: None,
+        prelude: None,
+        command: instruction::Command {
+            query: "*RST".to_string(),
+            parameters: None,
+        },
+        response: None,
+        description: Some("Reset the instrument. Depending on the instrument, this may reset the device to a known state or reboot the device.".to_string()),
+    };
+    assert_eq!(
+        instructions[instructions.len() - 1],
+        instruction_reset_device
+    );
 }
 
 #[test(tokio::test)]
