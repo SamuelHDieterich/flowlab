@@ -27,7 +27,7 @@ use tokio::net::TcpStream;
 use tracing::{debug, info};
 
 /// TCP specific fields
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct TCP {
     /// IP address of the device
     pub ip: IpAddr,
@@ -38,10 +38,12 @@ pub struct TCP {
 impl Device<TCP> {
     /// Create a new TCP device
     pub fn new(name: &str, ip: IpAddr, port: u16) -> Self {
+        info!("Creating new TCP device");
         Device {
             name: name.to_string(),
             instruction: vec![],
             protocol: TCP { ip, port },
+            default_arguments: None,
         }
     }
 }

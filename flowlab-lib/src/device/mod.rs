@@ -11,7 +11,7 @@ The device module is used to define the device types that are instruments that c
 
 // Base device module
 mod base;
-pub use crate::device::base::{Device, Query};
+pub use crate::device::base::*;
 
 // TCP device module
 #[cfg(feature = "tcp")]

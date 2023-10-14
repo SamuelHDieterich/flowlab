@@ -1,12 +1,31 @@
-- name: device1
+- name: 612
   protocol:
-    ip: 127.0.0.1
-    port: 1234
+    ip: 192.168.1.2
+    port: 5000
   instruction:
     - scpi
-- name: device2
+    - 612
+- name: 612A
   protocol:
-    ip: 127.0.0.1
-    port: 1234
+    ip: 192.168.1.2
+    port: 5000
   instruction:
     - scpi
+    - 612
+  default_arguments:
+    - name: channel
+      value: CHA
+    - name: units
+      value: K
+- name: 612B
+  protocol:
+    ip: 192.168.1.2
+    port: 5000
+  instruction:
+    - scpi
+    - 612
+  default_arguments:
+    - name: channel
+      value: CHB
+    - name: units
+      value: K

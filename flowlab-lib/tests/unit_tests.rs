@@ -13,13 +13,37 @@ async fn test_read_file() {
 
 #[test(tokio::test)]
 async fn test_parse_devices() {
-    use serde_yaml::Value;
+    use serde_yaml::{Mapping, Number, Value};
 
     info!("Testing parse file contents to device struct");
     let devices: Vec<device::Device<Value>> = parser::parse("../config/devices/devices.yaml")
         .await
         .unwrap();
-    assert_eq!(devices.len(), 2);
+    let mut temp_protocol = Mapping::new();
+    temp_protocol.insert(
+        Value::String("ip".to_string()),
+        Value::String("192.168.1.2".to_string()),
+    );
+    temp_protocol.insert(
+        Value::String("port".to_string()),
+        Value::Number(Number::from(5000)),
+    );
+    let device_612a = device::Device {
+        name: "612A".to_string(),
+        instruction: vec!["scpi".to_string(), "612".to_string()],
+        protocol: Value::Mapping(temp_protocol),
+        default_arguments: Some(vec![
+            device::Arguments {
+                name: "channel".to_string(),
+                value: "CHA".to_string(),
+            },
+            device::Arguments {
+                name: "units".to_string(),
+                value: "K".to_string(),
+            },
+        ]),
+    };
+    assert_eq!(devices[1], device_612a);
 }
 
 #[test(tokio::test)]

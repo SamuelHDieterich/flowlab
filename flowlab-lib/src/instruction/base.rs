@@ -15,7 +15,7 @@ use serde_with::skip_serializing_none;
 
 /// The Instruction struct is used to define the instructions that a device can perform.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Instruction {
     #[serde(rename = "instruction")]
     pub name: String,
@@ -28,7 +28,7 @@ pub struct Instruction {
 
 /// The Command struct is used to define the command that a device can perform.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Command {
     pub query: String,
     pub parameters: Option<Vec<Parameters>>,
@@ -36,7 +36,7 @@ pub struct Command {
 
 /// The Parameters struct is used to define the parameters that a command can take.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Parameters {
     pub name: String,
     #[serde(rename = "type", default = "default_data_type")]
@@ -48,7 +48,7 @@ pub struct Parameters {
 
 /// The Response struct is used to define the response that a command can return.
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Response {
     pub attribute: String,
     #[serde(rename = "type", default = "default_data_type")]

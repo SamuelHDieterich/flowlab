@@ -16,7 +16,7 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 /// A device is a physical or virtual object that can be controlled or monitored by the program
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Device<Protocol> {
     /// Name of the device
     pub name: String,
@@ -24,6 +24,15 @@ pub struct Device<Protocol> {
     pub instruction: Vec<String>,
     /// Protocol which the device can communicate with
     pub protocol: Protocol,
+    /// Default arguments for the instructions
+    pub default_arguments: Option<Vec<Arguments>>,
+}
+
+/// Arguments for the instructions
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub struct Arguments {
+    pub name: String,
+    pub value: String,
 }
 
 /// A protocol must implement the Query trait
