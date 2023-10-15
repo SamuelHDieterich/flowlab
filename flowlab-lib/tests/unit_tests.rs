@@ -49,11 +49,11 @@ async fn test_parse_devices() {
 #[test(tokio::test)]
 async fn test_parse_instructions() {
     info!("Testing parsing file contents to instructions struct");
-    let instructions: Vec<instruction::Instruction> =
+    let instructions: Vec<instruction::DeviceCommand> =
         parser::parse("../config/instructions/scpi.yaml")
             .await
             .unwrap();
-    let instruction_reset_device = instruction::Instruction {
+    let instruction_reset_device = instruction::DeviceCommand {
         name: "Reset the device".to_string(),
         alias: None,
         prelude: None,
@@ -74,7 +74,7 @@ async fn test_parse_instructions() {
 async fn test_find_instruction_with_name() {
     info!("Testing finding instruction with specific name");
     // Get the instructions from the file
-    let instructions: Vec<instruction::Instruction> =
+    let instructions: Vec<instruction::DeviceCommand> =
         parser::parse("../config/instructions/scpi.yaml")
             .await
             .unwrap();
@@ -107,7 +107,7 @@ async fn test_parse_instructions_with_parameters() {
 
     info!("Testing formatting an instruction with parameters");
     // Get the instructions from the file
-    let instructions: Vec<instruction::Instruction> =
+    let instructions: Vec<instruction::DeviceCommand> =
         parser::parse("../config/instructions/612.yaml")
             .await
             .unwrap();
@@ -120,4 +120,29 @@ async fn test_parse_instructions_with_parameters() {
     // Format the command
     let command = instruction::format_command(&instruction.command, &parameters).unwrap();
     assert_eq!(command, "INPUT 1:TEMPERATURE?");
+}
+
+#[test(tokio::test)]
+async fn test_parse_pipeline() {
+    info!("Testing parsing a pipeline");
+    // Get the pipeline from the file
+    let pipeline: Vec<instruction::PipelineStep> =
+        parser::parse("../config/pipelines/example_pipeline.yaml")
+            .await
+            .unwrap();
+    print!("{:?}", pipeline);
+    // Check if there is at least one type of each Instruction enum
+    let mut device_command = false;
+    let mut wait_for = false;
+    let mut scan = false;
+    for instruction in pipeline {
+        match instruction {
+            instruction::PipelineStep::DeviceInstruction(_) => device_command = true,
+            instruction::PipelineStep::WaitFor(_) => wait_for = true,
+            instruction::PipelineStep::Scan(_) => scan = true,
+        }
+    }
+    assert!(device_command);
+    assert!(wait_for);
+    assert!(scan);
 }
