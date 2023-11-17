@@ -1,5 +1,5 @@
 <h1 align="center">
-<image src="assets/flowlab_logo.svg" width="350">
+<image src="assets/flowlab_logo.png" width="350">
 </h1>
 
 <p align="center">
