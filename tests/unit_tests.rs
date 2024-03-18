@@ -1,11 +1,11 @@
-use flowlab_lib::{device, instruction, parser};
+use flowlab::{device, instruction, parser};
 use test_log::test;
 use tracing::info;
 
 #[test(tokio::test)]
 async fn test_read_file() {
     info!("Testing reading file asynchronously");
-    let contents = parser::read_file("../config/devices/devices.yaml")
+    let contents = parser::read_file("./config/devices/devices.yaml")
         .await
         .unwrap();
     assert!(contents.contains("name:"));
@@ -16,7 +16,7 @@ async fn test_parse_devices() {
     use serde_yaml::{Mapping, Number, Value};
 
     info!("Testing parse file contents to device struct");
-    let devices: Vec<device::Device<Value>> = parser::parse("../config/devices/devices.yaml")
+    let devices: Vec<device::Device<Value>> = parser::parse("./config/devices/devices.yaml")
         .await
         .unwrap();
     let mut temp_protocol = Mapping::new();
@@ -50,7 +50,7 @@ async fn test_parse_devices() {
 async fn test_parse_instructions() {
     info!("Testing parsing file contents to instructions struct");
     let instructions: Vec<instruction::DeviceCommand> =
-        parser::parse("../config/instructions/scpi.yaml")
+        parser::parse("./config/instructions/scpi.yaml")
             .await
             .unwrap();
     let instruction_reset_device = instruction::DeviceCommand {
@@ -75,7 +75,7 @@ async fn test_find_instruction_with_name() {
     info!("Testing finding instruction with specific name");
     // Get the instructions from the file
     let instructions: Vec<instruction::DeviceCommand> =
-        parser::parse("../config/instructions/scpi.yaml")
+        parser::parse("./config/instructions/scpi.yaml")
             .await
             .unwrap();
     // Get the instruction with the name "Identify the device"
@@ -108,7 +108,7 @@ async fn test_parse_instructions_with_parameters() {
     info!("Testing formatting an instruction with parameters");
     // Get the instructions from the file
     let instructions: Vec<instruction::DeviceCommand> =
-        parser::parse("../config/instructions/612.yaml")
+        parser::parse("./config/instructions/612.yaml")
             .await
             .unwrap();
     // Get the instruction with the name "Get temperature"
@@ -127,7 +127,7 @@ async fn test_parse_pipeline() {
     info!("Testing parsing a pipeline");
     // Get the pipeline from the file
     let pipeline: Vec<instruction::PipelineStep> =
-        parser::parse("../config/pipelines/example_pipeline.yaml")
+        parser::parse("./config/pipelines/example_pipeline.yaml")
             .await
             .unwrap();
     print!("{:?}", pipeline);

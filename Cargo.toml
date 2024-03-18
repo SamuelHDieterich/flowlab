@@ -1,19 +1,26 @@
 [package]
-name = "flowlab-lib"
+name = "flowlab"
 version = "0.1.0"
 edition = "2021"
 repository = "https://github.com/SamuelHDieterich/flowlab"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "flowlab"
+path = "src/lib.rs"
+
+[[bin]]
+name = "flowlab"
+path = "src/main.rs"
 
 [dependencies]
-async-trait = "0.1.73"
+async-trait = "0.1.78"
 serde = { version = "1.0.188", features = ["derive"] }
-serde_with = "3.3.0"
+serde_with = "3.7.0"
 serde_yaml = "0.9.25"
-tera = { version = "1.19.1", default-features = false }
-tokio = { version = "1.33.0", features = ["net", "io-util", "fs"] }
+tera = "1.19.1"
+tokio = { version = "1.33.0", features = ["full"] }
 tracing = "0.1.37"
+tracing-subscriber = "0.3.17"
 
 [features]
 default = []
