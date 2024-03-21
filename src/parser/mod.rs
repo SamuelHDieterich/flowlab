@@ -1,13 +1,5 @@
-/*
- ____
-|  _ \ __ _ _ __ ___  ___ _ __
-| |_) / _` | '__/ __|/ _ \ '__|
-|  __/ (_| | |  \__ \  __/ |
-|_|   \__,_|_|  |___/\___|_|
-
-The parser module is used to read/write YAML files and parse them into generic data structures.
-
-*/
+//! # Parser
+//! The parser module is used to read/write YAML files and parse them into generic data structures.
 
 // Serde
 use serde::Deserialize;
@@ -21,6 +13,15 @@ use tokio::io::{self, AsyncReadExt};
 use tracing::debug;
 
 /// Read a file and return its contents as a string
+///
+/// # Arguments
+///
+/// - `path`
+///   A path to the file to read
+///
+/// # Returns
+///
+/// The contents of the file as a string
 #[tracing::instrument]
 pub async fn read_file(path: impl AsRef<Path> + std::fmt::Debug) -> io::Result<String> {
     // Open the file
@@ -35,8 +36,8 @@ pub async fn read_file(path: impl AsRef<Path> + std::fmt::Debug) -> io::Result<S
     Ok(contents)
 }
 
-/// Error type for the parser
-/// This error type is used to wrap all the possible errors that can occur during the parsing process
+/// Error type for the parser.
+/// This error type is used to wrap all the possible errors that can occur during the parsing process.
 #[derive(Debug)]
 pub enum ParserError {
     /// IO Error: reading the file
@@ -58,6 +59,15 @@ impl From<serde_yaml::Error> for ParserError {
 }
 
 /// Parse a YAML file into a generic data structure
+///
+/// # Arguments
+///
+/// - `path`
+///   A path to the file to parse
+///
+/// # Returns
+///
+/// The parsed data structure of type `T`
 #[tracing::instrument]
 pub async fn parse<T>(path: impl AsRef<Path> + std::fmt::Debug) -> Result<T, ParserError>
 where

@@ -1,21 +1,19 @@
-/*
- ____
-| __ )  __ _ ___  ___
-|  _ \ / _` / __|/ _ \
-| |_) | (_| \__ \  __/
-|____/ \__,_|___/\___|
-
-Base building blocks for creating devices with generic protocols.
-
-*/
+//! # Base
+//! Base building blocks for creating devices with generic protocols.
+//!
+//! With this module, you can create `Device`s with any `Protocol` that implements the `Query` trait.
+//! - `Device`: Physical or virtual object that can be controlled or monitored by the system.
+//! - `Protocol`: Communication protocol that the device can communicate with, for instance, `TCP` and `Serial`.
+//! - `Query`: Trait that allows the device to send commands and receive responses.
 
 // Allows traits to have async functions
+// This is required for the Query trait for Rust version 1.75 or below and, for now, it is recommended for public traits.
 use async_trait::async_trait;
 
 // Serde: Serialization/Deserialization framework
 use serde::{Deserialize, Serialize};
 
-/// A device is a physical or virtual object that can be controlled or monitored by the program
+/// A device is a physical or virtual object that can be controlled or monitored by the system.
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Device<Protocol> {
     /// Name of the device
@@ -35,8 +33,7 @@ pub struct Arguments {
     pub value: String,
 }
 
-/// A protocol must implement the Query trait
-/// This trait allows the device to send commands and receive responses
+/// A protocol must implement the Query trait which allows the device to send commands and receive responses.
 #[async_trait]
 pub trait Query {
     /// Send a command to the device and return the response (if any).

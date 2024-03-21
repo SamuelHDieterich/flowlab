@@ -1,13 +1,8 @@
-/*
- ____             _
-|  _ \  _____   _(_) ___ ___
-| | | |/ _ \ \ / / |/ __/ _ \
-| |_| |  __/\ V /| | (_|  __/
-|____/ \___| \_/ |_|\___\___|
-
-The device module is used to define the device types that are instruments that can perform instructions through a specific protocol.
-
-*/
+//! # Device
+//! Device module is used to define the device types that are instruments that can perform instructions through a specific protocol.
+//!
+//! Specific protocols can be enabled through features. For instance, the `TCP` protocol can be enabled with the `tcp` feature.
+//! The `Protocols` enum is used to define the protocols that a device can use, according to the enabled features.
 
 // Base device module
 mod base;

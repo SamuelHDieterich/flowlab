@@ -1,13 +1,5 @@
-/*
- ____
-| __ )  __ _ ___  ___
-|  _ \ / _` / __|/ _ \
-| |_) | (_| \__ \  __/
-|____/ \__,_|___/\___|
-
-This submodule has the building blocks to build instructions defined in YAML files.
-
-*/
+//! # Base
+//! Building blocks to create instructions defined through configuration files (e.g., YAML).
 
 // Serde: Serialization/Deserialization framework
 use serde::{Deserialize, Serialize};
@@ -57,6 +49,9 @@ pub struct Response {
     pub description: Option<String>,
 }
 
+/// The DataType enum is used to define the data types that a parameter or response can take.
+/// It is used to define the data type of the parameter or response.
+/// The order of the variants is important for the deserialization process.
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(untagged)]
 pub enum DataType {
@@ -71,6 +66,53 @@ pub fn default_data_type() -> String {
 }
 
 /// Get an instruction from a vector of instructions by its name
+///
+/// # Arguments
+///
+/// - `instructions`
+///   A `Vec` of `DeviceCommand` with the instructions.
+/// - `name`
+///   A `&str` with the name of the instruction to be found.
+///
+/// # Returns
+///
+/// A reference to the `DeviceCommand` with the instruction found.
+///
+/// # Example
+///
+/// ```
+/// use flowlab::instruction::base::{Parameters, Command, DeviceCommand, find_instruction_with_name};
+///
+/// let instructions = vec![
+///    DeviceCommand {
+///        name: "echo".to_string(),
+///        alias: None,
+///        prelude: None,
+///        command: Command {
+///            query: "echo {{ param1 }} {{ param2 }}".to_string(),
+///            parameters: Some(vec![
+///                Parameters {
+///                    name: "param1".to_string(),
+///                    data_type: "string".to_string(),
+///                    values: None,
+///                    default: None,
+///                    description: None,
+///                },
+///                Parameters {
+///                    name: "param2".to_string(),
+///                    data_type: "string".to_string(),
+///                    values: None,
+///                    default: None,
+///                    description: None,
+///                },
+///            ])
+///        },
+///        response: None,
+///        description: None,
+///    },
+/// ];
+/// let instruction = find_instruction_with_name(&instructions, "echo");
+/// ```
 #[tracing::instrument]
 pub fn find_instruction_with_name<'a>(
     instructions: &'a Vec<DeviceCommand>,

@@ -1,13 +1,11 @@
-/*
- _____ ____ ____
-|_   _/ ___|  _ \
-  | || |   | |_) |
-  | || |___|  __/
-  |_| \____|_|
-
-TCP Protocol implementation.
-
-*/
+//! # TCP
+//! TCP protocol implementation for `Device`.
+//!
+//! This module contains the TCP protocol implementation for the `Device` struct.
+//! TCP is a well-known communication protocol that can be used to communicate with devices over a network connection (e.g., Ethernet).
+//! The `Protocol` requires an IP address and a port to communicate with the device.
+//!
+//! The `tcp` feature must be enabled to use this module.
 
 // Base device implementation
 use super::base::{Device, Query};
