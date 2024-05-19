@@ -23,3 +23,13 @@ pub enum Protocols {
     #[cfg(feature = "tcp")]
     TCP(TCP),
 }
+
+impl std::fmt::Display for Protocols {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let serialized = match serde_yaml::to_string(self) {
+            Ok(s) => s,
+            Err(_) => return Err(std::fmt::Error),
+        };
+        write!(f, "{}", serialized)
+    }
+}

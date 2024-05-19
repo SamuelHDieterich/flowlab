@@ -33,6 +33,12 @@ pub struct TCP {
     pub port: u16,
 }
 
+impl std::fmt::Display for TCP {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "(TCP) {}:{}", self.ip, self.port)
+    }
+}
+
 impl Device<TCP> {
     /// Create a new TCP device
     pub fn new(name: &str, ip: IpAddr, port: u16) -> Self {

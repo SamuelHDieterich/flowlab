@@ -93,3 +93,93 @@ pub enum Number {
     Integer(i32),
     Float(f32),
 }
+
+impl std::fmt::Display for PipelineStep {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let serialized = match serde_yaml::to_string(self) {
+            Ok(s) => s,
+            Err(_) => return Err(std::fmt::Error),
+        };
+        write!(f, "{}", serialized)
+    }
+}
+
+impl std::fmt::Display for DeviceInstruction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let serialized = match serde_yaml::to_string(self) {
+            Ok(s) => s,
+            Err(_) => return Err(std::fmt::Error),
+        };
+        write!(f, "{}", serialized)
+    }
+}
+
+impl std::fmt::Display for DeviceInstructionParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let serialized = match serde_yaml::to_string(self) {
+            Ok(s) => s,
+            Err(_) => return Err(std::fmt::Error),
+        };
+        write!(f, "{}", serialized)
+    }
+}
+
+impl std::fmt::Display for WaitFor {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let serialized = match serde_yaml::to_string(self) {
+            Ok(s) => s,
+            Err(_) => return Err(std::fmt::Error),
+        };
+        write!(f, "{}", serialized)
+    }
+}
+
+impl std::fmt::Display for WaitForParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let serialized = match serde_yaml::to_string(self) {
+            Ok(s) => s,
+            Err(_) => return Err(std::fmt::Error),
+        };
+        write!(f, "{}", serialized)
+    }
+}
+
+impl std::fmt::Display for Scan {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let serialized = match serde_yaml::to_string(self) {
+            Ok(s) => s,
+            Err(_) => return Err(std::fmt::Error),
+        };
+        write!(f, "{}", serialized)
+    }
+}
+
+impl std::fmt::Display for ScanType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let serialized = match serde_yaml::to_string(self) {
+            Ok(s) => s,
+            Err(_) => return Err(std::fmt::Error),
+        };
+        write!(f, "{}", serialized)
+    }
+}
+
+impl std::fmt::Display for ScanParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let serialized = match serde_yaml::to_string(self) {
+            Ok(s) => s,
+            Err(_) => return Err(std::fmt::Error),
+        };
+        write!(f, "{}", serialized)
+    }
+}
+
+impl std::fmt::Display for Number {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let serialized = match serde_yaml::to_string(self) {
+            Ok(s) => s,
+            Err(_) => return Err(std::fmt::Error),
+        };
+        write!(f, "{}", serialized)
+    }
+}

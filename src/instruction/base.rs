@@ -120,3 +120,53 @@ pub fn find_instruction_with_name<'a>(
 ) -> Option<&'a DeviceCommand> {
     instructions.iter().find(|&i| i.name == name)
 }
+
+impl std::fmt::Display for DeviceCommand {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let serialized = match serde_yaml::to_string(self) {
+            Ok(s) => s,
+            Err(_) => return Err(std::fmt::Error),
+        };
+        write!(f, "{}", serialized)
+    }
+}
+
+impl std::fmt::Display for Command {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let serialized = match serde_yaml::to_string(self) {
+            Ok(s) => s,
+            Err(_) => return Err(std::fmt::Error),
+        };
+        write!(f, "{}", serialized)
+    }
+}
+
+impl std::fmt::Display for Parameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let serialized = match serde_yaml::to_string(self) {
+            Ok(s) => s,
+            Err(_) => return Err(std::fmt::Error),
+        };
+        write!(f, "{}", serialized)
+    }
+}
+
+impl std::fmt::Display for Response {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let serialized = match serde_yaml::to_string(self) {
+            Ok(s) => s,
+            Err(_) => return Err(std::fmt::Error),
+        };
+        write!(f, "{}", serialized)
+    }
+}
+
+impl std::fmt::Display for DataType {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let serialized = match serde_yaml::to_string(self) {
+            Ok(s) => s,
+            Err(_) => return Err(std::fmt::Error),
+        };
+        write!(f, "{}", serialized)
+    }
+}
