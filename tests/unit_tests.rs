@@ -1,4 +1,4 @@
-use flowlab::{device, instruction, parser};
+use flowlab::{device, instruction, parser, pipeline};
 use test_log::test;
 use tracing::info;
 
@@ -16,9 +16,7 @@ async fn test_parse_devices() {
     use serde_yaml::{Mapping, Number, Value};
 
     info!("Testing parse file contents to device struct");
-    let devices: Vec<device::Device<Value>> = parser::parse("./config/devices/devices.yaml")
-        .await
-        .unwrap();
+    let devices: Vec<device::Device<Value>> = parser::parse("./config/devices/devices.yaml").await.unwrap();
     let mut temp_protocol = Mapping::new();
     temp_protocol.insert(
         Value::String("ip".to_string()),
@@ -29,17 +27,17 @@ async fn test_parse_devices() {
         Value::Number(Number::from(5000)),
     );
     let device_612a = device::Device {
-        name: "612A".to_string(),
-        instruction: vec!["scpi".to_string(), "612".to_string()],
+        name: "612A",
+        instruction: vec!["scpi", "612"],
         protocol: Value::Mapping(temp_protocol),
         default_arguments: Some(vec![
             device::Arguments {
-                name: "channel".to_string(),
-                value: "CHA".to_string(),
+                name: "channel",
+                value: "CHA",
             },
             device::Arguments {
-                name: "units".to_string(),
-                value: "K".to_string(),
+                name: "units",
+                value: "K",
             },
         ]),
     };
@@ -49,20 +47,20 @@ async fn test_parse_devices() {
 #[test(tokio::test)]
 async fn test_parse_instructions() {
     info!("Testing parsing file contents to instructions struct");
-    let instructions: Vec<instruction::DeviceCommand> =
+    let instructions: Vec<instruction::Instruction> =
         parser::parse("./config/instructions/scpi.yaml")
             .await
             .unwrap();
-    let instruction_reset_device = instruction::DeviceCommand {
-        name: "Reset the device".to_string(),
+    let instruction_reset_device = instruction::Instruction {
+        name: "Reset the device",
         alias: None,
         prelude: None,
         command: instruction::Command {
-            query: "*RST".to_string(),
+            query: "*RST",
             parameters: None,
         },
         response: None,
-        description: Some("Reset the instrument. Depending on the instrument, this may reset the device to a known state or reboot the device.".to_string()),
+        description: "Reset the instrument. Depending on the instrument, this may reset the device to a known state or reboot the device.",
     };
     assert_eq!(
         instructions[instructions.len() - 1],
@@ -74,7 +72,7 @@ async fn test_parse_instructions() {
 async fn test_find_instruction_with_name() {
     info!("Testing finding instruction with specific name");
     // Get the instructions from the file
-    let instructions: Vec<instruction::DeviceCommand> =
+    let instructions: Vec<instruction::Instruction> =
         parser::parse("./config/instructions/scpi.yaml")
             .await
             .unwrap();
@@ -107,7 +105,7 @@ async fn test_parse_instructions_with_parameters() {
 
     info!("Testing formatting an instruction with parameters");
     // Get the instructions from the file
-    let instructions: Vec<instruction::DeviceCommand> =
+    let instructions: Vec<instruction::Instruction> =
         parser::parse("./config/instructions/612.yaml")
             .await
             .unwrap();
@@ -126,7 +124,7 @@ async fn test_parse_instructions_with_parameters() {
 async fn test_parse_pipeline() {
     info!("Testing parsing a pipeline");
     // Get the pipeline from the file
-    let pipeline: Vec<instruction::PipelineStep> =
+    let pipeline: Vec<pipeline::PipelineStep> =
         parser::parse("./config/pipelines/example_pipeline.yaml")
             .await
             .unwrap();
@@ -137,9 +135,9 @@ async fn test_parse_pipeline() {
     let mut scan = false;
     for instruction in pipeline {
         match instruction {
-            instruction::PipelineStep::DeviceInstruction(_) => device_command = true,
-            instruction::PipelineStep::WaitFor(_) => wait_for = true,
-            instruction::PipelineStep::Scan(_) => scan = true,
+            pipeline::PipelineStep::DeviceInstruction(_) => device_command = true,
+            pipeline::PipelineStep::WaitFor(_) => wait_for = true,
+            pipeline::PipelineStep::Scan(_) => scan = true,
         }
     }
     assert!(device_command);

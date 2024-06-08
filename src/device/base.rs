@@ -6,62 +6,65 @@
 //! - `Protocol`: Communication protocol that the device can communicate with, for instance, `TCP` and `Serial`.
 //! - `Query`: Trait that allows the device to send commands and receive responses.
 
+use crate::{from_map_to_vec, from_vec_to_map, Data, DataType, MapKey, Mapify};
+use flowlab_macros::{MapKey, Mapify};
+use std::{collections::HashMap, path::PathBuf};
+
 // Allows traits to have async functions
 // This is required for the Query trait for Rust version 1.75 or below and, for now, it is recommended for public traits.
 use async_trait::async_trait;
 
 // Serde: Serialization/Deserialization framework
 use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
 
+#[derive(Debug, PartialEq, Mapify)]
+pub struct DeviceCollection<Protocol>(HashMap<PathBuf, Vec<Device<Protocol>>>);
+
+impl<Protocol> DeviceCollection<Protocol> {
+    pub fn new(filepath: PathBuf, devices: Vec<Device<Protocol>>) -> Self {
+        let mut map = HashMap::new();
+        map.insert(filepath, devices);
+        Self(map)
+    }
+}
+
+impl<Protocol> Default for DeviceCollection<Protocol> {
+    fn default() -> Self {
+        Self(HashMap::new())
+    }
+}
 /// A device is a physical or virtual object that can be controlled or monitored by the system.
-#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Device<Protocol> {
     /// Name of the device
     pub name: String,
     /// Instructions set that the device can execute
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub instruction: Vec<String>,
     /// Protocol which the device can communicate with
     pub protocol: Protocol,
     /// Default arguments for the instructions
-    pub default_arguments: Option<Vec<Arguments>>,
-}
-
-/// Display implementation for the Device struct
-///
-/// name: <name>
-/// instruction: <instruction>
-/// protocol: <protocol>
-/// default_arguments: <default_arguments>
-impl<Protocol> std::fmt::Display for Device<Protocol> 
-where
-    Protocol: std::fmt::Display + Serialize
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let serialized = match serde_yaml::to_string(self) {
-            Ok(s) => s,
-            Err(_) => return Err(std::fmt::Error),
-        };
-        write!(f, "{}", serialized)
-    }
+    #[serde(
+        serialize_with = "from_map_to_vec",
+        deserialize_with = "from_vec_to_map",
+        skip_serializing_if = "HashMap::is_empty",
+        default
+    )]
+    pub default_arguments: HashMap<String, Arguments>,
 }
 
 /// Arguments for the instructions
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, MapKey)]
 pub struct Arguments {
     pub name: String,
-    pub value: String,
+    pub value: Data,
 }
 
-impl std::fmt::Display for Arguments {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let serialized = match serde_yaml::to_string(self) {
-            Ok(s) => s,
-            Err(_) => return Err(std::fmt::Error),
-        };
-        write!(f, "{}", serialized)
-    }
+pub fn find_device_with_name<'a, Protocol>(
+    devices: &'a Vec<Device<Protocol>>,
+    name: &str,
+) -> Option<&'a Device<Protocol>> {
+    devices.iter().find(|d| d.name == name)
 }
 
 /// A protocol must implement the Query trait which allows the device to send commands and receive responses.

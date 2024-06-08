@@ -22,6 +22,7 @@
       - name: channel
         value: CHA
   parameters:
+    name: temperature
     value: 2
     tolerance: 0.1 # absolute tolerance
     delay: 120 # seconds

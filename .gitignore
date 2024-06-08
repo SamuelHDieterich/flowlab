@@ -4,3 +4,6 @@
 # Build file for the project
 **/target
 build
+
+# Ignore some temporary files
+sandbox

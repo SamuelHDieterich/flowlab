@@ -1,19 +1,17 @@
 # SCPI/IEEE-488.2 Common Commands
-- instruction: Identify the device
-  alias:
-    - Device information
+- instruction: Device information
   command:
     query: "*IDN?"
   response:
-    - attribute: manufacturer
+    - name: manufacturer
       type: string
-    - attribute: model
+    - name: model
       type: string
-    - attribute: serial number
+    - name: serial number
       type: integer
-    - attribute: firmware version
+    - name: firmware version
       type: string
-    - attribute: build number
+    - name: build number
       type: integer
   description: Returns the manufacturer, model number, serial number, and firmware version of the device.
 - instruction: Reset the device

@@ -65,21 +65,21 @@ pub fn hashmap_to_context(hashmap: &HashMap<String, String>) -> Context {
 ///
 /// ```
 /// use std::collections::HashMap;
-/// use flowlab::instruction::{base::{Parameters, Command}, format::format_command};
+/// use flowlab::instruction::{base::{Parameters, Command, DataTypeCategory}, format::format_command};
 ///
 /// let command = Command {
 ///    query: "echo {{ param1 }} {{ param2 }}".to_string(),
 ///    parameters: Some(vec![
 ///        Parameters {
 ///            name: "param1".to_string(),
-///            data_type: "string".to_string(),
+///            data_type: DataTypeCategory::String,
 ///            values: None,
 ///            default: None,
 ///            description: None,
 ///        },
 ///        Parameters {
 ///            name: "param2".to_string(),
-///            data_type: "string".to_string(),
+///            data_type: DataTypeCategory::String,
 ///            values: None,
 ///            default: None,
 ///            description: None,
@@ -97,18 +97,13 @@ pub fn format_command(
     parameters: &HashMap<String, String>,
 ) -> Result<String, tera::Error> {
     debug!("Converting hashmap to context");
-    // Check if the command has Parameters
-    if command.parameters.is_none() {
-        warn!("Command has no parameters");
-        return Ok(command.query.clone());
-    }
     // Check if the parameters are empty
     if parameters.is_empty() {
         warn!("Parameters are empty");
-        return Ok(command.query.clone());
+        return Ok(command.query.to_string());
     }
     // Check if length of parameters is equal to the length of the command parameters
-    if command.parameters.as_ref().unwrap().len() != parameters.len() {
+    if command.parameters.len() != parameters.len() {
         warn!("Length of parameters is not equal to the length of the command parameters");
         return Err(tera::Error::msg(
             "Length of parameters is not equal to the length of the command parameters",
