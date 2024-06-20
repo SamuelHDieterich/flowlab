@@ -1,0 +1,39 @@
+devices:
+  - name: TM612
+    description: Temperature Monitor 612
+    protocol:
+      ip: 192.168.1.2
+      port: 5000
+    instructions:
+      - path: ./config/instructions/SCPI.yaml
+      - path: ./config/instructions/TM612.yaml
+      - name: Reset the device
+        command:
+          query: "*RST"
+        description: Reset the instrument. Depending on the instrument, this may reset the device to a known state or reboot the device.
+  - name: TM612A
+    description: Temperature Monitor 612 - Channel A
+    protocol:
+      ip: 192.168.1.2
+      port: 5000
+    instructions:
+      - path: ./config/instructions/SCPI.yaml
+      - path: ./config/instructions/TM612.yaml
+    default_arguments:
+      - name: channel
+        value: CHA
+      - name: units
+        value: K
+  - name: TM612B
+    description: Temperature Monitor 612 - Channel B
+    protocol:
+      ip: 192.168.1.2
+      port: 5000
+    instructions:
+      - path: ./config/instructions/SCPI.yaml
+      - path: ./config/instructions/TM612.yaml
+    default_arguments:
+      - name: channel
+        value: CHB
+      - name: units
+        value: K

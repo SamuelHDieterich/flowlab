@@ -1,0 +1,101 @@
+# This is a template for a pipeline configuration file. It is used to create a new pipeline.
+
+# For now, we can define one pipeline per file. This may change in the future.
+# To include some metadata about the pipeline, that may be useful for the user, we can give a name and a description to the pipeline.
+name: PipelineName
+description: Pipeline Description
+
+# It is preferable to define the instructions and pipelines in separate files and just reference them here. However, for simplicity, we can define them inline.
+# Consider that for the deserialization process:
+# 1. The order of the definitions is important. If an instruction is referenced before it is defined, an error will be raised.
+# 2. If the same instruction or device is defined multiple times, the last definition will be used.
+
+# Follow the instructions template for more information on how to define instructions.
+instructions:
+  - &InstructionName
+    name: InstructionName
+    command:
+      query: "query {{argument1}} {{argument2}}"
+      parameters:
+        - name: argument1
+          description: Description of argument 1
+        - name: argument2
+          description: Description of argument 2
+    response:
+      - name: response_name
+        type: response_type
+        values:
+          - value1
+          - value2
+        description: Description of response
+    description: Instruction Description
+  # Add more instructions here...
+  - ...
+
+# The devices is required to be at least referenced here.
+# Follow the devices template for more information on how to define devices.
+devices:
+  - path: ../devices/device.yaml
+  - name: DeviceName
+    protocol:
+      ip: 192.168.1.1
+      port: 1234
+    instructions:
+      - <<: *InstructionName
+
+# The pipeline is a list of steps that will be executed in a sequencial order.
+# Some special functions can also include inner steps, such as the scan function.
+pipeline:
+  # In a instruction step, we just reference an instruction and a device and pass the required parameters.
+  # The step value is the name of the instruction.
+  - step: InstructionStep
+    device: DeviceName
+    parameters:
+      - name: argument1
+        value: value1
+      - name: argument2
+        value: value2
+  # Wait for is a special function that will wait for a metric to reach a certain value. If an GET instruction is not defined, it will just wait for the time specified.
+  - step: Wait for
+    # If this block is not defined, it will just wait for the time specified.
+    metric:
+      instruction: InstructionName
+      device: DeviceName
+    parameters:
+      name: metric_name
+      value: 0
+      tolerance: 1
+      delay: 60 # seconds
+  # Scan is a special function that will execute a series of steps in a loop.
+  - step: Scan
+    metrics:
+      # The metric is a list of steps that will be executed in each iteration to prepare the state for the measures.
+      - step: InstructionStep
+        device: DeviceName
+        parameters:
+          # One of the parameters must be a variable that will be changed in each iteration.
+          # - name: argument1
+          #   value: value1
+          - name: argument2
+            value: value2
+    # ????
+    type: sweep
+    # The parameters block is used to define the variable that will be changed in each iteration.
+    parameters:
+      variable: variable_name
+      start: 0
+      stop: 100
+      step: 1
+    # The datafile is the path to the file where the measures will be saved.
+    # The file name can be a template string that will be replaced by the variable value.
+    datafile: /tmp/{{PIPELINE_NAME}}_{{DATE}}_{{variable_name}}.csv
+    measures:
+      - step: InstructionStep
+        device: DeviceName
+        parameters:
+          - name: argument1
+            value: value1
+          - name: argument2
+            value: value2
+  # Add more steps here...
+  - ...
