@@ -177,7 +177,24 @@ where
             }
             // Check if the metric response has a parameter that corresponds to the wait for parameter
             if let Some(wait_for_parameter) = &wait_for.parameters.name {
-                if !_parameters_stack.contains(wait_for_parameter) {
+                // Include the metric response values to the stack
+                let mut parameters_stack = _parameters_stack.clone();
+                if let Some(metric) = &wait_for.metric {
+                    if let Some(metric_instruction) = devices[&metric.device]
+                        .instructions
+                        .get(&metric.instruction)
+                    {
+                        let metric_response = metric_instruction
+                            .response
+                            .keys()
+                            .cloned()
+                            .collect::<Vec<String>>();
+                        parameters_stack.extend(metric_response);
+                    }
+                }
+                tracing::debug!(?wait_for_parameter);
+                tracing::debug!(?parameters_stack);
+                if !parameters_stack.contains(wait_for_parameter) {
                     tracing::error!(
                         parameter = %wait_for_parameter,
                         "Parameter is missing in the scope"
@@ -192,7 +209,9 @@ where
         Step::Scan(scan) => {
             // Add the scan variable to the stack
             let mut parameters_stack = _parameters_stack.clone();
-            parameters_stack.insert(scan.parameters.variable.clone());
+            let scan_variable = scan.parameters.variable.clone();
+            tracing::debug!(?scan_variable);
+            parameters_stack.insert(scan_variable);
 
             // Check if the scan metrics are consistent
             for metric in &scan.metrics {
