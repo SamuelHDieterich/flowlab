@@ -222,3 +222,27 @@ where
     }
     Ok(())
 }
+
+//------------------------//
+//---  IMPLEMENATIONS  ---//
+//------------------------//
+
+impl<Protocol> Pipeline<Protocol>
+where
+    Protocol: DeserializeOwned + Query + std::fmt::Debug + std::clone::Clone,
+{
+    /// Create a new pipeline configuration
+    pub fn new(
+        name: String,
+        description: String,
+        devices: HashMap<String, Device<Protocol>>,
+        pipeline: Vec<Step>,
+    ) -> Self {
+        Self {
+            name,
+            description,
+            devices,
+            pipeline,
+        }
+    }
+}

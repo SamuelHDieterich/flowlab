@@ -7,3 +7,6 @@ build
 
 # Ignore some temporary files
 sandbox
+
+# Ignore test logs
+logs
