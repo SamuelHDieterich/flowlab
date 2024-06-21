@@ -12,3 +12,6 @@ pub use crate::instruction::base::*;
 // Format instruction module
 pub mod format;
 pub use crate::instruction::format::*;
+
+// Serde implementations
+pub mod deserialize;

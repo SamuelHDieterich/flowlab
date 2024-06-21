@@ -18,16 +18,6 @@ use serde::Serialize;
 //---  FUNCTIONS  ---//
 //-------------------//
 
-// #[tracing::instrument]
-// pub fn hashmap_to_context(hashmap: &HashMap<String, String>) -> Context {
-//     tracing::debug!("Converting hashmap to context");
-//     let mut context = Context::new();
-//     for (key, value) in hashmap {
-//         context.insert(key, value);
-//     }
-//     context
-// }
-
 #[tracing::instrument]
 pub fn format_command<T>(command: &Command, parameters: &T) -> Result<String, tera::Error>
 where

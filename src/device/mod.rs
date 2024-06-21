@@ -12,6 +12,9 @@
 mod base;
 pub use crate::device::base::*;
 
+// Serde implementations
+mod deserialize;
+
 // TCP device module
 #[cfg(feature = "tcp")]
 mod tcp;

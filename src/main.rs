@@ -70,10 +70,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Test pipeline deserialization
     tracing::info!("Loading pipeline");
-    let _pipeline: pipeline::Pipeline<device::Protocols> =
+    let pipeline: pipeline::Pipeline<device::Protocols> =
         serde_yaml::from_reader(std::fs::File::open(cli.pipeline)?)?;
     tracing::info!("Pipeline loaded");
-    println!("{:#?}", _pipeline);
+    // println!("{:#?}", pipeline);
 
     Ok(())
 }
