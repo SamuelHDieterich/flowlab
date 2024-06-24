@@ -259,3 +259,18 @@ where
         }
     }
 }
+
+impl DeviceInstruction {
+    /// Create a new DeviceInstruction struct
+    pub fn new(
+        instruction: String,
+        device: String,
+        parameters: HashMap<String, Arguments>,
+    ) -> Self {
+        Self {
+            instruction,
+            device,
+            parameters,
+        }
+    }
+}

@@ -20,7 +20,7 @@ use std::collections::HashMap;
 
 // External crates
 //// Serde: Serialization/Deserialization framework
-use serde::de::DeserializeOwned;
+use serde::{de::DeserializeOwned, Serialize};
 
 //-----------------//
 //---  STRUCTS  ---//
@@ -45,7 +45,7 @@ where
 }
 
 /// Arguments for the instructions
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Arguments {
     /// Argument identifier
     pub name: String,

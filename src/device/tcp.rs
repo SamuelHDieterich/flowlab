@@ -75,6 +75,7 @@ impl Query for TCP {
         }
         tracing::trace!("Converting buffer to string");
         let response = String::from_utf8_lossy(&buffer[..n]).to_string();
+        tracing::debug!(?response);
         Ok(Some(response))
     }
 }

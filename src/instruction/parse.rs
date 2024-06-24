@@ -10,10 +10,7 @@
 
 // Internal modules
 //// Base instruction implementation
-use super::{
-    base::{Command, Response},
-    Parameter,
-};
+use super::{Command, Parameter, Response};
 use crate::{Data, DataType};
 
 // Built-in modules
@@ -26,26 +23,25 @@ use serde::Serialize;
 //// Regex: Regular expressions
 use regex::Regex;
 
-//-------------------//
-//---  FUNCTIONS  ---//
-//-------------------//
-
-#[tracing::instrument]
-pub fn format_command<T>(command: &Command, parameters: &T) -> Result<String, tera::Error>
-where
-    T: Serialize + std::fmt::Debug,
-{
-    // Convert the parameters to a context
-    let context = tera::Context::from_serialize(parameters)?;
-    let mut tera = tera::Tera::default();
-    tera.add_raw_template("command", &command.query)?;
-    tracing::debug!("Formatting command");
-    tera.render("command", &context)
-}
-
 //-------------------------//
 //---  IMPLEMENTATIONS  ---//
 //-------------------------//
+
+impl Command {
+    /// Render the command with the given parameters.
+    #[tracing::instrument(level = "debug")]
+    pub fn render<T>(&self, parameters: &T) -> Result<String, tera::Error>
+    where
+        T: Serialize + std::fmt::Debug,
+    {
+        // Convert the parameters to a context
+        let context = tera::Context::from_serialize(parameters)?;
+        let mut tera = tera::Tera::default();
+        tera.add_raw_template("command", &self.query)?;
+        tracing::debug!("Formatting command");
+        tera.render("command", &context)
+    }
+}
 
 impl Response {
     /// Create a pattern from the format and parameters.

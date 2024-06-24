@@ -79,6 +79,7 @@ fn setup_logging(
 
     let stdout_layer = tracing_subscriber::fmt::layer()
         .with_ansi(true)
+        .compact()
         .with_line_number(false)
         .with_target(false)
         .with_file(false)
@@ -136,12 +137,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         cli.log_level,
     )?;
 
-    // Test pipeline deserialization
-    tracing::info!("Loading pipeline");
+    // Deserialize pipeline configuration
+    tracing::info!("Loading pipeline.");
     let pipeline: pipeline::Pipeline<device::Protocols> =
         serde_yaml::from_reader(std::fs::File::open(cli.pipeline)?)?;
-    tracing::info!("Pipeline loaded");
+    tracing::info!(name = ?pipeline.name, "Pipeline successfully loaded.");
     // println!("{:#?}", pipeline);
+
+    // Execute pipeline
+    tracing::info!("Executing pipeline.");
+    pipeline.execute().await?;
 
     Ok(())
 }

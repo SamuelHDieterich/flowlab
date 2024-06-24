@@ -11,3 +11,6 @@ pub use crate::pipeline::base::*;
 
 // Serde implementations
 mod deserialize;
+
+// Run pipeline module
+pub mod run;
