@@ -126,16 +126,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
     tracing::debug!(?cli);
 
-    // Setup tracing subscriber - Logging system
-    // Subscriber::builder()
-    //     .with_max_level(cli.log_level)
-    //     .pretty()
-    //     .with_line_number(true)
-    //     .with_target(false)
-    //     .with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE)
-    //     .with_file(true)
-    //     .init();
-
+    // Setup logging
     let _guard = setup_logging(
         PathBuf::from("logs"),
         PathBuf::from(format!(

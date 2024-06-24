@@ -50,7 +50,7 @@ instructions:
     command:
       query: IMAG?
     response: # -40.000kG
-      format: "{{current}}{{units}}"
+      format: "{{magnet current}}{{units}}"
       parameters:
         - name: magnet current
           type: float

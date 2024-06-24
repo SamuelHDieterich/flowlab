@@ -670,8 +670,17 @@ impl<'de> Deserialize<'de> for Response {
                     return Err(serde::de::Error::missing_field("format"));
                 }
 
+                let _pattern = Response::create_pattern(&format, &parameters).map_err(|e| {
+                    tracing::error!(error = %e, "Failed to create pattern");
+                    serde::de::Error::custom(e)
+                })?;
+
                 // Create a new Response struct
-                Ok(Response { format, parameters })
+                Ok(Response {
+                    format,
+                    parameters,
+                    _pattern,
+                })
             }
         }
 

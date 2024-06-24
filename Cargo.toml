@@ -16,6 +16,7 @@ path = "src/main.rs"
 async-trait = "0.1.78"
 chrono = "0.4.38"
 clap = { version = "4.5.3", features = ["cargo", "derive"] }
+regex = "1.10.5"
 serde = { version = "1.0.188", features = ["derive"] }
 serde_with = "3.7.0"
 serde_yaml = "0.9.25"

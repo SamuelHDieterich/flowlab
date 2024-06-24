@@ -393,6 +393,7 @@ dependencies = [
  "async-trait",
  "chrono",
  "clap",
+ "regex",
  "serde",
  "serde_with",
  "serde_yaml",

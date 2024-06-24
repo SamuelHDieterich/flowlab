@@ -10,8 +10,8 @@ pub mod base;
 pub use crate::instruction::base::*;
 
 // Format instruction module
-pub mod format;
-pub use crate::instruction::format::*;
+pub mod parse;
+pub use crate::instruction::parse::*;
 
 // Serde implementations
 pub mod deserialize;

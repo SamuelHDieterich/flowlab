@@ -43,8 +43,29 @@ pub struct Command {
 }
 
 /// The Response struct is used to define the response that a command can return.
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct Response {
     pub format: String,
     pub parameters: HashMap<String, Parameter>,
+    pub(crate) _pattern: regex::Regex,
+}
+
+//-------------------------//
+//---  IMPLEMENTATIONS  ---//
+//-------------------------//
+
+impl Default for Response {
+    fn default() -> Self {
+        Response {
+            format: String::default(),
+            parameters: HashMap::new(),
+            _pattern: regex::Regex::new("").unwrap(),
+        }
+    }
+}
+
+impl PartialEq for Response {
+    fn eq(&self, other: &Self) -> bool {
+        self.format == other.format && self.parameters == other.parameters
+    }
 }
