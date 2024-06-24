@@ -22,7 +22,17 @@ pub struct Instruction {
     pub name: String,
     pub description: String,
     pub command: Command,
-    pub response: HashMap<String, Response>,
+    pub response: Option<Response>,
+}
+
+/// The Parameter struct is used to define the parameters that a command can take or return.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Parameter {
+    pub name: String,
+    pub data_type: DataType,
+    pub values: Vec<Data>,
+    pub default: Option<Data>,
+    pub description: String,
 }
 
 /// The Command struct is used to define the command that a device can perform.
@@ -32,20 +42,9 @@ pub struct Command {
     pub parameters: HashMap<String, Parameter>,
 }
 
-/// The Parameter struct is used to define the parameters that a command can take.
-#[derive(Debug, Clone, PartialEq)]
-pub struct Parameter {
-    pub name: String,
-    pub data_type: DataType,
-    pub values: Vec<Data>,
-    pub default: Option<Data>,
-    pub description: String,
-}
 /// The Response struct is used to define the response that a command can return.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct Response {
-    pub name: String,
-    pub data_type: DataType,
-    pub values: Vec<Data>,
-    pub description: String,
+    pub format: String,
+    pub parameters: HashMap<String, Parameter>,
 }

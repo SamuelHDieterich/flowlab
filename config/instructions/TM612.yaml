@@ -8,8 +8,10 @@ instructions:
           type: string
           description: "The channel identification, options include: number (example: 0), characther (example: A), or channel ID (example: CHA)."
     response:
-      - name: temperature
-        type: float
+      format: "{{temperature}}"
+      parameters:
+        - name: temperature
+          type: float
     description: Reports the current temperature reading on any of the input channels.
   - name: Set display units
     command:
@@ -36,11 +38,13 @@ instructions:
           type: string
           description: "The channel identification, options include: number (example: 0), characther (example: A), or channel ID (example: CHA)."
     response:
-      - name: units
-        type: string
-        values:
-          - K
-          - C
-          - F
-          - S
+      format: "{{units}}"
+      parameters:
+        - name: units
+          type: string
+          values:
+            - K
+            - C
+            - F
+            - S
     description: Reports the display units of temperature used by the specific input channel.

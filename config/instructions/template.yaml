@@ -13,12 +13,16 @@ instructions:
         - name: argument2
           description: Description of argument 2
     response:
-      - name: response_name
-        type: response_type
-        values:
-          - value1
-          - value2
-        description: Description of response
+      # The format is a template for the response. It is used to extract the response from the device response.
+      format: "{{response_name}}"
+      # The parameters are the values that are extracted from the response.
+      parameters:
+        - name: response_name
+          type: response_type
+          values:
+            - value1
+            - value2
+          description: Description of response
     # The description is a human-readable description of the instruction. It is optional.
     description: Instruction Description
   # Add more instructions here...

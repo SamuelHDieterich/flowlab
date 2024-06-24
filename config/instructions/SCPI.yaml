@@ -4,16 +4,20 @@ instructions:
     command:
       query: "*IDN?"
     response:
-      - name: manufacturer
-        type: string
-      - name: model
-        type: string
-      - name: serial number
-        type: integer
-      - name: firmware version
-        type: string
-      - name: build number
-        type: integer
+      format: "{{identification}}"
+      parameters:
+        - name: identification
+          type: string
+        # - name: manufacturer
+        #   type: string
+        # - name: model
+        #   type: string
+        # - name: serial number
+        #   type: integer
+        # - name: firmware version
+        #   type: string
+        # - name: build number
+        #   type: integer
     description: Returns the manufacturer, model number, serial number, and firmware version of the device.
   - name: Reset the device
     command:

@@ -64,7 +64,7 @@ impl<'de> Deserialize<'de> for Instruction {
                 let mut name = String::new();
                 let mut description = String::new();
                 let mut command = None;
-                let mut response = HashMap::new();
+                let mut response = None;
 
                 // Loop through the fields of the Instruction struct
                 while let Some(key) = map.next_key()? {
@@ -140,20 +140,19 @@ impl<'de> Deserialize<'de> for Instruction {
                             let span = tracing::trace_span!("Field::Response");
                             let _enter = span.enter();
 
-                            // The response parameter in the input file is defined as a list
-                            let _response: Vec<Response> = map.next_value()?;
-                            tracing::debug!(response_len = %_response.len());
-
-                            // Convert the list of responses to a HashMap
-                            for r in _response {
-                                if response.contains_key(&r.name) {
-                                    tracing::warn!(
-                                        response_name = %r.name,
-                                        "Response name is duplicated"
-                                    );
-                                }
-                                response.insert(r.name.clone(), r);
+                            // Check if the response field is duplicated
+                            if response.is_some() {
+                                tracing::error!(
+                                    previous_response = ?response,
+                                    new_response = ?map.next_value::<Response>()?,
+                                    "Field 'response' is duplicated"
+                                );
+                                return Err(serde::de::Error::duplicate_field("response"));
                             }
+
+                            // Get the response value
+                            response = Some(map.next_value()?);
+                            tracing::debug!(?response);
 
                             // Close the span
                             drop(_enter);
@@ -211,9 +210,7 @@ impl serde::ser::Serialize for Instruction {
         state.serialize_field("command", &self.command)?;
 
         // Serialize the response field
-        // The response field is a HashMap, so it needs to be serialized as a list
-        let responses: Vec<&Response> = self.response.values().collect();
-        state.serialize_field("response", &responses)?;
+        state.serialize_field("response", &self.response)?;
 
         // Close the struct
         state.end()
@@ -586,10 +583,8 @@ impl<'de> Deserialize<'de> for Response {
         #[derive(Deserialize)]
         #[serde(field_identifier, rename_all = "lowercase")]
         enum Field {
-            Name,
-            Type,
-            Values,
-            Description,
+            Format,
+            Parameters,
         }
 
         // Response visitor
@@ -615,88 +610,53 @@ impl<'de> Deserialize<'de> for Response {
                 let _enter = span.enter();
 
                 // Initialize the fields of the Response struct
-                let mut name = String::new();
-                let mut data_type = DataType::String;
-                let mut values = Vec::new();
-                let mut description = String::new();
+                let mut format = String::new();
+                let mut parameters = HashMap::new();
 
                 // Loop through the fields of the Response struct
                 while let Some(key) = map.next_key()? {
                     match key {
-                        Field::Name => {
-                            // Create a new span for the Field::Name
-                            let span = tracing::trace_span!("Field::Name");
+                        Field::Format => {
+                            // Create a new span for the Field::Format
+                            let span = tracing::trace_span!("Field::Format");
                             let _enter = span.enter();
 
-                            // Check if the name field is duplicated
-                            if !name.is_empty() {
+                            // Check if the format field is duplicated
+                            if !format.is_empty() {
                                 tracing::error!(
-                                    previous_name = %name,
-                                    new_name = %map.next_value::<String>()?,
-                                    "Field 'name' is duplicated"
+                                    previous_format = %format,
+                                    new_format = %map.next_value::<String>()?,
+                                    "Field 'format' is duplicated"
                                 );
-                                return Err(serde::de::Error::duplicate_field("name"));
+                                return Err(serde::de::Error::duplicate_field("format"));
                             }
 
-                            // Get the name value
-                            name = map.next_value()?;
-                            tracing::debug!(%name);
+                            // Get the format value
+                            format = map.next_value()?;
+                            tracing::debug!(%format);
 
                             // Close the span
                             drop(_enter);
                         }
-                        Field::Type => {
-                            // Create a new span for the Field::Type
-                            let span = tracing::trace_span!("Field::Type");
+                        Field::Parameters => {
+                            // Create a new span for the Field::Parameters
+                            let span = tracing::trace_span!("Field::Parameters");
                             let _enter = span.enter();
 
-                            // Check if the type field is duplicated
-                            if data_type != DataType::String {
-                                tracing::error!(
-                                    previous_type = ?data_type,
-                                    new_type = ?map.next_value::<DataType>()?,
-                                    "Field 'type' is duplicated"
-                                );
-                                return Err(serde::de::Error::duplicate_field("type"));
+                            // The parameters parameter in the input files is defined as a list
+                            let _parameters: Vec<Parameter> = map.next_value()?;
+                            tracing::debug!(parameters_len = %_parameters.len());
+
+                            // Convert the list of parameters to a HashMap
+                            for p in _parameters {
+                                if parameters.contains_key(&p.name) {
+                                    tracing::warn!(
+                                        parameter_name = %p.name,
+                                        "Parameter name is duplicated"
+                                    );
+                                }
+                                parameters.insert(p.name.clone(), p);
                             }
-
-                            // Get the type value
-                            data_type = map.next_value()?;
-                            tracing::debug!(?data_type);
-
-                            // Close the span
-                            drop(_enter);
-                        }
-                        Field::Values => {
-                            // Create a new span for the Field::Values
-                            let span = tracing::trace_span!("Field::Values");
-                            let _enter = span.enter();
-
-                            // Get the values value
-                            values = map.next_value()?;
-                            tracing::debug!(values_len = %values.len());
-
-                            // Close the span
-                            drop(_enter);
-                        }
-                        Field::Description => {
-                            // Create a new span for the Field::Description
-                            let span = tracing::trace_span!("Field::Description");
-                            let _enter = span.enter();
-
-                            // Check if the description field is duplicated
-                            if !description.is_empty() {
-                                tracing::error!(
-                                    previous_description = %description,
-                                    new_description = %map.next_value::<String>()?,
-                                    "Field 'description' is duplicated"
-                                );
-                                return Err(serde::de::Error::duplicate_field("description"));
-                            }
-
-                            // Get the description value
-                            description = map.next_value()?;
-                            tracing::debug!(%description);
 
                             // Close the span
                             drop(_enter);
@@ -705,23 +665,18 @@ impl<'de> Deserialize<'de> for Response {
                 }
 
                 // Check if mandatory fields are missing
-                if name.is_empty() {
-                    tracing::error!("Field 'name' is missing");
-                    return Err(serde::de::Error::missing_field("name"));
+                if format.is_empty() {
+                    tracing::error!("Field 'format' is missing");
+                    return Err(serde::de::Error::missing_field("format"));
                 }
 
                 // Create a new Response struct
-                Ok(Response {
-                    name,
-                    data_type,
-                    values,
-                    description,
-                })
+                Ok(Response { format, parameters })
             }
         }
 
         // Field identifiers for the Response struct
-        const FIELDS: &[&str] = &["name", "type", "values", "description"];
+        const FIELDS: &[&str] = &["format", "parameters"];
         // Deserialize the Response struct
         deserializer.deserialize_struct("Response", FIELDS, ResponseVisitor)
     }
@@ -738,19 +693,15 @@ impl serde::ser::Serialize for Response {
         let _enter = span.enter();
 
         // Create a new struct for the Response struct
-        let mut state = serializer.serialize_struct("Response", 4)?;
+        let mut state = serializer.serialize_struct("Response", 2)?;
 
-        // Serialize the name field
-        state.serialize_field("name", &self.name)?;
+        // Serialize the format field
+        state.serialize_field("format", &self.format)?;
 
-        // Serialize the data_type field
-        state.serialize_field("type", &self.data_type)?;
-
-        // Serialize the values field
-        state.serialize_field("values", &self.values)?;
-
-        // Serialize the description field
-        state.serialize_field("description", &self.description)?;
+        // Serialize the parameters field
+        // The parameters field is a HashMap, so it needs to be serialized as a list
+        let parameters: Vec<&Parameter> = self.parameters.values().collect();
+        state.serialize_field("parameters", &parameters)?;
 
         // Close the struct
         state.end()

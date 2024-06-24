@@ -79,9 +79,9 @@ fn setup_logging(
 
     let stdout_layer = tracing_subscriber::fmt::layer()
         .with_ansi(true)
-        .with_line_number(true)
+        .with_line_number(false)
         .with_target(false)
-        .with_file(true)
+        .with_file(false)
         .with_writer(std::io::stdout)
         .with_filter(EnvFilter::from_default_env().add_directive(stdout_log_level.into()));
 

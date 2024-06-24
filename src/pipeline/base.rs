@@ -183,6 +183,19 @@ where
                     {
                         let metric_response = metric_instruction
                             .response
+                            .as_ref()
+                            .ok_or_else(|| {
+                                tracing::error!(
+                                    device = %metric.device,
+                                    instruction = %metric.instruction,
+                                    "Instruction does not have a response"
+                                );
+                                format!(
+                                    "Instruction '{}' of device '{}' does not have a response",
+                                    metric.instruction, metric.device
+                                )
+                            })?
+                            .parameters
                             .keys()
                             .cloned()
                             .collect::<Vec<String>>();
