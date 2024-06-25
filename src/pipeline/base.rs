@@ -60,9 +60,9 @@ pub struct WaitFor {
 #[derive(Debug, Clone)]
 pub struct WaitForParameters {
     pub name: Option<String>,
-    pub value: Option<f32>,
-    pub tolerance: Option<f32>,
-    pub delay: u32,
+    pub value: Option<f64>,
+    pub tolerance: Option<f64>,
+    pub delay: u64,
 }
 
 /// The `Scan` struct is a generic instruction that can be used to scan/loop a specific property to perform some measurements.

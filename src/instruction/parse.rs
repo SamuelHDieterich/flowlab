@@ -11,15 +11,13 @@
 // Internal modules
 //// Base instruction implementation
 use super::{Command, Parameter, Response};
-use crate::{Data, DataType};
+use crate::{device::Arguments, Data, DataType};
 
 // Built-in modules
 //// Basic data structures
 use std::collections::HashMap;
 
 // External crates
-//// Serde: Serialization/Deserialization framework
-use serde::Serialize;
 //// Regex: Regular expressions
 use regex::Regex;
 
@@ -29,24 +27,31 @@ use regex::Regex;
 
 impl Command {
     /// Render the command with the given parameters.
-    #[tracing::instrument(level = "debug")]
-    pub fn render<T>(&self, parameters: &T) -> Result<String, tera::Error>
-    where
-        T: Serialize + std::fmt::Debug,
-    {
+    #[tracing::instrument(name = "Command::render", level = "debug")]
+    pub fn render(&self, parameters: &HashMap<String, Arguments>) -> Result<String, tera::Error> {
         // Convert the parameters to a context
-        let context = tera::Context::from_serialize(parameters)?;
+        let mut context = tera::Context::new();
+        for (name, arguments) in parameters {
+            context.insert(name, &arguments.value.to_string());
+        }
+        // Create a Tera instance
         let mut tera = tera::Tera::default();
         tera.add_raw_template("command", &self.query)?;
-        tracing::debug!("Formatting command");
-        tera.render("command", &context)
+        // Render the command
+        let rendered_query = tera.render("command", &context).map_err(|e| {
+            tracing::error!("Error rendering command: {}", e);
+            e
+        })?;
+        tracing::debug!(?rendered_query);
+
+        Ok(rendered_query)
     }
 }
 
 impl Response {
     /// Create a pattern from the format and parameters.
     /// This function replaces the parameters in the format with the appropriate regex pattern. That way, the response can be parsed and its values extracted.
-    #[tracing::instrument(level = "debug")]
+    #[tracing::instrument(name = "Response::create_pattern", level = "debug")]
     pub(crate) fn create_pattern(
         format: &str,
         parameters: &HashMap<String, Parameter>,
@@ -76,7 +81,7 @@ impl Response {
     }
 
     /// Parse the response and return a hashmap with the extracted values.
-    #[tracing::instrument(level = "debug")]
+    #[tracing::instrument(name = "Response::parse", level = "debug")]
     pub fn parse(&self, response: &str) -> Result<HashMap<String, Data>, String> {
         let mut parsed_data = HashMap::new();
         if let Some(captures) = self._pattern.captures(response) {

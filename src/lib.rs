@@ -68,3 +68,14 @@ impl Default for DataType {
         DataType::String
     }
 }
+
+impl std::fmt::Display for Data {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Data::Boolean(value) => write!(f, "{}", value),
+            Data::Integer(value) => write!(f, "{}", value),
+            Data::Float(value) => write!(f, "{}", value),
+            Data::String(value) => write!(f, "{}", value),
+        }
+    }
+}

@@ -15,15 +15,21 @@
 //// The `Query` trait is used to send commands and receive responses from the device.
 use super::Query;
 
+// Built-in modules
+//// Network
+use std::net::{IpAddr, Ipv4Addr};
+//// Time
+use std::time::Duration;
+
 // External crates
 //// Allows traits to have async functions
 use async_trait::async_trait;
 //// Serde: Serialization/Deserialization framework
 use serde::Deserialize;
 //// Async TCP implementation
-use std::net::IpAddr;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
+use tokio::time::timeout;
 
 //-----------------//
 //---  STRUCTS  ---//
@@ -52,7 +58,7 @@ impl TCP {
 impl Default for TCP {
     fn default() -> Self {
         Self {
-            ip: IpAddr::V4(std::net::Ipv4Addr::new(0, 0, 0, 0)),
+            ip: IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)),
             port: 0,
         }
     }
@@ -60,15 +66,43 @@ impl Default for TCP {
 
 #[async_trait]
 impl Query for TCP {
-    #[tracing::instrument]
+    #[tracing::instrument(name = "TCP::query", level = "debug")]
     async fn query(&self, command: &str) -> Result<Option<String>, std::io::Error> {
         tracing::trace!("Connecting to device");
-        let mut stream = TcpStream::connect((self.ip, self.port)).await?;
+        let mut stream = timeout(
+            Duration::from_secs(5),
+            TcpStream::connect((self.ip, self.port)),
+        )
+        .await
+        .map_err(|e| {
+            tracing::error!("Error connecting to device: {}", e);
+            e
+        })?
+        .map_err(|e| {
+            match e.kind() {
+                std::io::ErrorKind::ConnectionRefused => {
+                    tracing::error!("Connection refused");
+                }
+                std::io::ErrorKind::TimedOut => {
+                    tracing::error!("Connection timed out");
+                }
+                _ => {
+                    tracing::error!("Error connecting to device: {}", e);
+                }
+            }
+            e
+        })?;
         tracing::trace!("Sending command");
-        stream.write_all(command.as_bytes()).await?;
+        stream.write_all(command.as_bytes()).await.map_err(|e| {
+            tracing::error!("Error sending command: {}", e);
+            e
+        })?;
         let mut buffer = [0; 1024];
         tracing::trace!("Saving response to buffer");
-        let n = stream.read(&mut buffer).await?;
+        let n = stream.read(&mut buffer).await.map_err(|e| {
+            tracing::error!("Error reading response: {}", e);
+            e
+        })?;
         if n == 0 {
             tracing::info!("No response from device");
             return Ok(None);

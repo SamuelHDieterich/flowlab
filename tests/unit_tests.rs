@@ -16,7 +16,9 @@ async fn test_parse_devices() {
     use serde_yaml::{Mapping, Number, Value};
 
     info!("Testing parse file contents to device struct");
-    let devices: Vec<device::Device<Value>> = parser::parse("./config/devices/devices.yaml").await.unwrap();
+    let devices: Vec<device::Device<Value>> = parser::parse("./config/devices/devices.yaml")
+        .await
+        .unwrap();
     let mut temp_protocol = Mapping::new();
     temp_protocol.insert(
         Value::String("ip".to_string()),

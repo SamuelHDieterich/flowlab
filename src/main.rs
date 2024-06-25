@@ -14,11 +14,7 @@ use std::{fmt::Debug, path::PathBuf};
 
 // External crates
 //// Logging framework
-use tracing_subscriber::{
-    fmt::{format::FmtSpan, Subscriber},
-    layer::SubscriberExt,
-    EnvFilter, Layer,
-};
+use tracing_subscriber::{fmt::format::FmtSpan, layer::SubscriberExt, EnvFilter, Layer};
 
 //-----------------//
 //---  STRUCTS  ---//
