@@ -52,7 +52,7 @@ where
         devices: &'a HashMap<String, Device<Protocol>>,
         step: &Step,
         _parameters_stack: &HashMap<String, Arguments>,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    ) -> Result<Option<HashMap<String, Data>>, Box<dyn std::error::Error>> {
         match step {
             Step::Instruction(device_instruction) => {
                 // Get the device
@@ -71,6 +71,7 @@ where
                 let data = device_instruction
                     .execute(device, instruction, &query)
                     .await?;
+                Ok(data)
             }
             Step::WaitFor(wait_for) => {
                 match &wait_for.metric {
@@ -88,10 +89,10 @@ where
                         // Render the query
                         let query = metric.render_query(device, &parameters)?;
 
-                        // Create the loop to keep checking the condition
-
+                        // Variables used in the loop
                         let mut interval = tokio::time::interval(Duration::from_millis(100)); // TODO: Make this configurable
                         let mut timer: Option<Instant> = None;
+                        let mut already_notified = false; // This is to avoid spamming the logs
 
                         // Loop until the condition is met
                         loop {
@@ -123,9 +124,12 @@ where
                                 }
                                 // No data returned
                                 None => {
-                                    tracing::error!(
-                                        "No data returned. Falling back to the delay time."
-                                    );
+                                    if !already_notified {
+                                        tracing::error!(
+                                            "No data returned. Falling back to the delay time."
+                                        );
+                                        already_notified = true;
+                                    }
                                     // Start the timer
                                     if timer.is_none() {
                                         timer = Some(Instant::now());
@@ -141,18 +145,19 @@ where
                                 }
                             }
                         }
+                        Ok(None)
                     }
                     // Simple case: wait for a fixed amount of time
                     None => {
-                        tracing::trace!("No metric defined. Using just the delay time");
+                        tracing::info!("No metric defined. Using just the delay time");
                         sleep(Duration::from_secs(wait_for.parameters.delay)).await;
-                        return Ok(());
+                        tracing::info!("Delay time elapsed. Continuing the pipeline.");
+                        return Ok(None);
                     }
                 }
             }
-            Step::Scan(scan) => {}
+            Step::Scan(scan) => Ok(None),
         }
-        Ok(())
     }
 }
 
