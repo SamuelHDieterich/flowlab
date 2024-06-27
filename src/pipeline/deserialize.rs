@@ -746,6 +746,8 @@ impl<'de> Deserialize<'de> for Scan {
             #[serde(rename = "step")]
             Name,
             Metrics,
+            #[serde(rename = "type")]
+            ScanType,
             Parameters,
             Datafile,
             Measures,
@@ -775,6 +777,7 @@ impl<'de> Deserialize<'de> for Scan {
 
                 // Initialize the fields of the Scan struct
                 let mut metrics = Vec::new();
+                let mut scan_type = None;
                 let mut parameters = None;
                 let mut datafile = None;
                 let mut measures = Vec::new();
@@ -792,6 +795,28 @@ impl<'de> Deserialize<'de> for Scan {
                             let metrics_value = map.next_value::<Vec<Step>>()?;
                             metrics.extend(metrics_value);
                             tracing::debug!(?metrics);
+
+                            // Close the span
+                            drop(_enter);
+                        }
+                        Field::ScanType => {
+                            // Create a new span for the Field::ScanType
+                            let span = tracing::trace_span!("Field::ScanType");
+                            let _enter = span.enter();
+
+                            // Check if the scan_type field is duplicated
+                            if scan_type.is_some() {
+                                tracing::error!(
+                                    previous_scan_type = ?scan_type,
+                                    new_scan_type = ?map.next_value::<String>()?,
+                                    "Field 'type' is duplicated"
+                                );
+                                return Err(serde::de::Error::duplicate_field("type"));
+                            }
+
+                            // Get the scan_type value
+                            scan_type = Some(map.next_value()?);
+                            tracing::debug!(?scan_type);
 
                             // Close the span
                             drop(_enter);
@@ -865,6 +890,10 @@ impl<'de> Deserialize<'de> for Scan {
                     tracing::error!("Field 'metrics' is missing");
                     return Err(serde::de::Error::missing_field("metrics"));
                 }
+                let scan_type = scan_type.ok_or_else(|| {
+                    tracing::error!("Field 'type' is missing");
+                    serde::de::Error::missing_field("type")
+                })?;
                 let parameters = parameters.ok_or_else(|| {
                     tracing::error!("Field 'parameters' is missing");
                     serde::de::Error::missing_field("parameters")
@@ -877,6 +906,7 @@ impl<'de> Deserialize<'de> for Scan {
                 // Return the Scan struct
                 Ok(Scan {
                     metrics,
+                    scan_type,
                     parameters,
                     datafile,
                     measures,
@@ -895,6 +925,53 @@ impl<'de> Deserialize<'de> for Scan {
         ];
         // Deserialize the Scan struct
         deserializer.deserialize_struct("Scan", FIELDS, ScanVisitor)
+    }
+}
+
+// Deserialize the ScanType enum
+impl<'de> Deserialize<'de> for ScanType {
+    fn deserialize<D>(deserializer: D) -> Result<ScanType, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        // Create a new span for the deserialization
+        let span = tracing::trace_span!("ScanType::deserialize");
+        let _enter = span.enter();
+
+        // Deserialize the ScanType enum
+        struct ScanTypeVisitor;
+        impl<'de> serde::de::Visitor<'de> for ScanTypeVisitor {
+            type Value = ScanType;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                // Create a new span for the expecting message
+                let span = tracing::trace_span!("ScanTypeVisitor::expecting");
+                let _enter = span.enter();
+
+                formatter.write_str("enum ScanType")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<ScanType, E>
+            where
+                E: serde::de::Error,
+            {
+                // Create a new span for the visit_str function
+                let span = tracing::trace_span!("ScanTypeVisitor::visit_str");
+                let _enter = span.enter();
+
+                // Deserialize the ScanType enum
+                match value {
+                    "settle" => Ok(ScanType::Settle),
+                    "sweep" => Ok(ScanType::Sweep),
+                    _ => Err(serde::de::Error::unknown_variant(value, VARIANTS)),
+                }
+            }
+        }
+
+        // Field identifiers for the ScanType enum
+        const VARIANTS: &'static [&'static str] = &["settle", "sweep"];
+        // Deserialize the ScanType enum
+        deserializer.deserialize_str(ScanTypeVisitor)
     }
 }
 

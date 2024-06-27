@@ -88,3 +88,10 @@ where
         self.default_arguments.get(name)
     }
 }
+
+impl Arguments {
+    /// Create a new argument
+    pub fn new(name: String, value: Data) -> Self {
+        Arguments { name, value }
+    }
+}

@@ -116,8 +116,7 @@ fn setup_logging(
 //---  MAIN  ---//
 //--------------//
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Read command-line arguments
     tracing::info!("Starting FlowLab");
     let cli = Cli::parse();
@@ -142,7 +141,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Execute pipeline
     tracing::info!("Executing pipeline.");
-    pipeline.execute().await?;
+    pipeline.execute()?;
 
     Ok(())
 }

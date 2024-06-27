@@ -50,9 +50,9 @@ instructions:
     command:
       query: IMAG?
     response: # -40.000kG
-      format: "{{magnet current}}{{units}}"
+      format: "{{magnet_current}}{{units}}"
       parameters:
-        - name: magnet current
+        - name: magnet_current
           type: float
         - name: units
           type: string
@@ -60,7 +60,7 @@ instructions:
             - A
             - kG
     description: Returns the magnet current (or magnetic field strength) in the present units. If the persistent switch heater is ON the magnet current returned will be the same as the power supply output current. If the persistent switch heater is off, the magnet current will be the value of the power supply output current when the persistent switch heater was last turned off. The magnet current will be set to zero if the power supply detects a quench.
-  - name: Set magnet current
+  - name: Set field
     command:
       query: IMAG {{value}}
       parameters:
@@ -72,9 +72,9 @@ instructions:
     command:
       query: IOUT?
     response:
-      format: "{{output current}}{{units}}"
+      format: "{{output_current}}{{units}}"
       parameters:
-        - name: output current
+        - name: output_current
           type: float
         - name: units
           type: string

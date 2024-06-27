@@ -1,0 +1,9 @@
+devices:
+  - name: 4G
+    description: Magnet field controller
+    protocol:
+      ip: 192.168.4.1
+      port: 5000
+    instructions:
+      - path: ./config/instructions/SCPI.yaml
+      - path: ./config/instructions/4G.yaml

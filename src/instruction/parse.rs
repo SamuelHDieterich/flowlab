@@ -18,6 +18,8 @@ use crate::{device::Arguments, Data, DataType};
 use std::collections::HashMap;
 
 // External crates
+//// Templating engine
+use tera;
 //// Regex: Regular expressions
 use regex::Regex;
 

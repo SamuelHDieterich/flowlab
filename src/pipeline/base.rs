@@ -7,10 +7,7 @@ use crate::device::{Arguments, Device, Query};
 
 // Built-in modules
 //// Basic data structures
-use std::{
-    collections::{HashMap, HashSet},
-    path::PathBuf,
-};
+use std::collections::{HashMap, HashSet};
 
 // External crates
 //// Serde: Serialization/Deserialization framework
@@ -69,10 +66,19 @@ pub struct WaitForParameters {
 #[derive(Debug, Clone)]
 pub struct Scan {
     pub metrics: Vec<Step>,
-    // pub scan_type: ScanType,
+    pub scan_type: ScanType,
     pub parameters: ScanParameters,
-    pub datafile: Option<PathBuf>,
+    pub datafile: Option<String>,
     pub measures: Vec<Step>,
+}
+
+/// `Scan` can be one of two types: `Settle` or `Sweep`. `Settle` means each record will be
+/// performed only when the scan step is completed. `Sweep` means the step is non-blocking and each
+/// registry will be performed as soon as possible.
+#[derive(Debug, Clone)]
+pub enum ScanType {
+    Settle,
+    Sweep,
 }
 
 /// The `ScanParameters` struct is used to define the parameters that a Scan instruction takes.
