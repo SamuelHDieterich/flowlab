@@ -1,20 +1,49 @@
 name: Example - Read temperature
-description: Example pipeline to read temperature "indefinitely".
+description: Example pipeline to read temperature.
 
 devices:
   - path: ./config/devices/TM612.yaml
+  - path: ./config/devices/24C.yaml
 
 pipeline:
-  # Read the current temperature
+  - step: Device information
+    device: TM612B
   - step: Get temperature
-    device: TM612A
-  # Keep reading the temperature
+    device: TM612B
+  - step: Get temperature
+    device: 24C - Sample
   - step: Wait for
     metric:
       instruction: Get temperature
-      device: TM612A
+      device: TM612B
     parameters:
       name: temperature
-      value: 0 # K
-      tolerance: 0.02 # K
+      value: 3.0 # K
+      tolerance: 1.0 # K
       delay: 60 # seconds
+  - step: Scan
+    metrics:
+      - step: Set temperature
+        device: 24C - Sample
+        parameters:
+          - name: rate
+            value: 0
+      - step: Wait for
+        metric:
+          instruction: Get temperature
+          device: 24C - Sample
+        parameters:
+          name: temperature
+          tolerance: 0.02 # K
+          delay: 60 # seconds
+    type: settle
+    parameters:
+      variable: temperature
+      start: 5
+      stop: 10
+      step: 1
+    measures:
+      - step: Get temperature
+        device: 24C - Sample
+      - step: Get temperature
+        device: TM612B
