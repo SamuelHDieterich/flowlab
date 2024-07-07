@@ -60,7 +60,7 @@ fn setup_logging(
     file_name: PathBuf,
     // Log level used for the STDOUT stream
     stdout_log_level: tracing::Level,
-) -> Result<(WorkerGuard, WorkerGuard), Box<dyn std::error::Error>> {
+) -> Result<(WorkerGuard, WorkerGuard), Box<dyn std::error::Error + Send + Sync>> {
     let mut log_file_name = file_name.clone();
     let mut jsonl_file_name = file_name;
 
@@ -116,7 +116,7 @@ fn setup_logging(
 //---  MAIN  ---//
 //--------------//
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // Read command-line arguments
     tracing::info!("Starting FlowLab");
     let cli = Cli::parse();

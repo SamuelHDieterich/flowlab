@@ -70,7 +70,7 @@ impl Query for TCP {
     async fn query(&self, command: &str) -> Result<Option<String>, std::io::Error> {
         tracing::trace!("Connecting to device");
         let mut stream = timeout(
-            Duration::from_secs(5),
+            Duration::from_secs(5), // TODO: Make timeout configurable
             TcpStream::connect((self.ip, self.port)),
         )
         .await
@@ -92,24 +92,47 @@ impl Query for TCP {
             }
             e
         })?;
+
         tracing::trace!("Sending command");
         stream.write_all(command.as_bytes()).await.map_err(|e| {
             tracing::error!("Error sending command: {}", e);
             e
         })?;
         let mut buffer = [0; 1024];
+
         tracing::trace!("Saving response to buffer");
-        let n = stream.read(&mut buffer).await.map_err(|e| {
+        let n = timeout(
+            Duration::from_secs(5), // TODO: Make timeout configurable
+            stream.read(&mut buffer),
+        )
+        .await
+        .map_err(|e| {
             tracing::error!("Error reading response: {}", e);
+            e
+        })?
+        .map_err(|e| {
+            match e.kind() {
+                std::io::ErrorKind::ConnectionRefused => {
+                    tracing::error!("Connection refused");
+                }
+                std::io::ErrorKind::TimedOut => {
+                    tracing::error!("Connection timed out");
+                }
+                _ => {
+                    tracing::error!("Error reading response: {}", e);
+                }
+            }
             e
         })?;
         if n == 0 {
-            tracing::info!("No response from device");
+            tracing::trace!("No response from device");
             return Ok(None);
         }
+
         tracing::trace!("Converting buffer to string");
         let response = String::from_utf8_lossy(&buffer[..n]).to_string();
         tracing::debug!(?response);
+
         Ok(Some(response))
     }
 }

@@ -16,7 +16,7 @@ use crate::{instruction::Instruction, Data};
 
 // Built-in modules
 //// Basic data structures
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 // External crates
 //// Serde: Serialization/Deserialization framework
@@ -37,11 +37,11 @@ where
     /// Description of the device (optional)
     pub description: String,
     /// Instruction set that the device can execute
-    pub instructions: HashMap<String, Instruction>,
+    pub instructions: BTreeMap<String, Instruction>,
     /// Protocol which the device can communicate with
     pub protocol: Protocol,
     /// Default arguments for the instructions executed by this device (optional)
-    pub default_arguments: HashMap<String, Arguments>,
+    pub default_arguments: BTreeMap<String, Arguments>,
 }
 
 /// Arguments for the instructions
@@ -65,9 +65,9 @@ where
     pub fn new(
         name: String,
         description: String,
-        instructions: HashMap<String, Instruction>,
+        instructions: BTreeMap<String, Instruction>,
         protocol: Protocol,
-        default_arguments: HashMap<String, Arguments>,
+        default_arguments: BTreeMap<String, Arguments>,
     ) -> Self {
         Device {
             name,

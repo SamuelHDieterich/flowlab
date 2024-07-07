@@ -7,6 +7,7 @@ use super::base::*;
 use super::Query;
 use crate::{instruction::Instruction, Data};
 
+use std::collections::BTreeMap;
 // Built-in modules
 //// Basic data structures
 use std::{collections::HashMap, path::PathBuf};
@@ -73,9 +74,9 @@ where
                 // Initialize the fields
                 let mut name = String::new();
                 let mut description = String::new();
-                let mut instructions: HashMap<String, Instruction> = HashMap::new();
+                let mut instructions: BTreeMap<String, Instruction> = BTreeMap::new();
                 let mut protocol = None;
-                let mut default_arguments = HashMap::new();
+                let mut default_arguments = BTreeMap::new();
 
                 // Instruction can be one of 2 types:
                 // 1. It can reference a file that contains the instructions (PathBuf)

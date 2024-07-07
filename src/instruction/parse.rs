@@ -15,7 +15,7 @@ use crate::{device::Arguments, Data, DataType};
 
 // Built-in modules
 //// Basic data structures
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 // External crates
 //// Templating engine
@@ -30,7 +30,7 @@ use regex::Regex;
 impl Command {
     /// Render the command with the given parameters.
     #[tracing::instrument(name = "Command::render", level = "debug")]
-    pub fn render(&self, parameters: &HashMap<String, Arguments>) -> Result<String, tera::Error> {
+    pub fn render(&self, parameters: &BTreeMap<String, Arguments>) -> Result<String, tera::Error> {
         // Convert the parameters to a context
         let mut context = tera::Context::new();
         for (name, arguments) in parameters {
@@ -84,8 +84,8 @@ impl Response {
 
     /// Parse the response and return a hashmap with the extracted values.
     #[tracing::instrument(name = "Response::parse", level = "debug")]
-    pub fn parse(&self, response: &str) -> Result<HashMap<String, Data>, String> {
-        let mut parsed_data = HashMap::new();
+    pub fn parse(&self, response: &str) -> Result<BTreeMap<String, Data>, String> {
+        let mut parsed_data = BTreeMap::new();
         if let Some(captures) = self._pattern.captures(response) {
             for name in self._pattern.capture_names().flatten() {
                 if let Some(value) = captures.name(name) {

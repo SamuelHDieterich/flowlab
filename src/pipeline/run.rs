@@ -6,23 +6,30 @@
 use crate::{
     device::{Arguments, Device, Query},
     instruction::Instruction,
-    pipeline::{DeviceInstruction, Pipeline, Scan, Step, WaitFor},
+    pipeline::{DeviceInstruction, Pipeline, Scan, ScanType, Step, WaitFor},
     Data,
 };
 
 // Built-in modules
-//// Basic data structures
-use std::{collections::HashMap, path::PathBuf};
+//// Standard library
+use std::{
+    collections::{BTreeMap, HashMap},
+    path::PathBuf,
+    sync::{Arc, Mutex},
+};
 
 // External crates
 //// Serde: Serialization/Deserialization framework
 use serde::de::DeserializeOwned;
 //// Tokio: Asynchronous runtime
+use tokio::task::JoinSet;
 use tokio::time::{Duration, Instant};
 //// Templating engine
 use tera;
 //// CSV: Reading and writing CSV files
 use csv;
+//// Time
+use chrono;
 
 //------------------------//
 //---  IMPLEMENATIONS  ---//
@@ -30,13 +37,14 @@ use csv;
 
 impl<Protocol> Pipeline<Protocol>
 where
-    Protocol: DeserializeOwned + Query + std::fmt::Debug + std::clone::Clone,
+    Protocol:
+        DeserializeOwned + Query + std::fmt::Debug + std::clone::Clone + Send + Sync + 'static,
 {
     /// Execute the pipeline.
     #[tracing::instrument(name = "Pipeline::execute", skip(self))]
-    pub fn execute(&self) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn execute(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         // Create a parameters stack
-        let mut parameters_stack = HashMap::new();
+        let mut parameters_stack = BTreeMap::new();
 
         // Include some constant values to the parameters stack
         // 1. Include the pipeline name
@@ -53,11 +61,12 @@ where
             ),
         );
         // 3. Include the pipeline start time
+        let pipeline_start_time = chrono::Utc::now();
         parameters_stack.insert(
             "PIPELINE_START_TIME".to_string(),
             Arguments::new(
                 "PIPELINE_START_TIME".to_string(),
-                Data::String(chrono::Utc::now().to_rfc3339()),
+                Data::String(pipeline_start_time.to_rfc3339()),
             ),
         );
 
@@ -67,15 +76,41 @@ where
 
         // Iterate over the steps in the pipeline
         for (index, step) in self.pipeline.iter().enumerate() {
-            tracing::info!("Executing step {}/{}", index + 1, pipeline_length);
+            let step_time = chrono::Utc::now();
+            let step_name = match step {
+                Step::Instruction(instruction) => &instruction.instruction,
+                Step::WaitFor(_) => "Wait for",
+                Step::Scan(_) => "Scan",
+            };
+            tracing::info!(
+                "Executing step {}/{} - {}",
+                index + 1,
+                pipeline_length,
+                step_name
+            );
             // 4. Include the step index
             parameters_stack.insert(
                 "STEP_INDEX".to_string(),
                 Arguments::new("STEP_INDEX".to_string(), Data::Integer(index as i64)),
             );
             // Execute the step
-            Pipeline::_execute(&self.devices, &step, &parameters_stack)?;
+            let data = Pipeline::_execute(&self.devices, &step, &parameters_stack)?;
+            if let Some(data) = data {
+                tracing::info!("Data: {:#?}", data);
+            }
+            tracing::info!(
+                "Step completed. Time elapsed: {:?}",
+                (chrono::Utc::now() - step_time)
+                    .to_std()
+                    .unwrap_or(Duration::from_secs(0))
+            );
         }
+        tracing::info!(
+            "Pipeline execution completed. Time elapsed: {:?}",
+            (chrono::Utc::now() - pipeline_start_time)
+                .to_std()
+                .unwrap_or(Duration::from_secs(0))
+        );
 
         Ok(())
     }
@@ -83,8 +118,11 @@ where
     fn _execute<'a>(
         devices: &'a HashMap<String, Device<Protocol>>,
         step: &Step,
-        _parameters_stack: &HashMap<String, Arguments>,
-    ) -> Result<Option<HashMap<String, Data>>, Box<dyn std::error::Error>> {
+        _parameters_stack: &BTreeMap<String, Arguments>,
+    ) -> Result<
+        Option<BTreeMap<String, BTreeMap<String, Data>>>,
+        Box<dyn std::error::Error + Send + Sync>,
+    > {
         match step {
             Step::Instruction(device_instruction) => {
                 // Get the device
@@ -133,70 +171,71 @@ where
                             .enable_all()
                             .build()?;
 
-                        let _: Result<(), Box<dyn std::error::Error>> = runtime.block_on(async {
-                            // Variables used in the loop
-                            let mut interval = tokio::time::interval(Duration::from_millis(100)); // TODO: Make this configurable
-                            let mut timer: Option<Instant> = None;
-                            let mut already_notified = false; // This is to avoid spamming the logs
+                        let _: Result<(), Box<dyn std::error::Error + Send + Sync>> = runtime
+                            .block_on(async {
+                                // Variables used in the loop
+                                let mut interval =
+                                    tokio::time::interval(Duration::from_millis(100)); // TODO: Make this configurable
+                                let mut timer: Option<Instant> = None;
 
-                            // Loop until the condition is met
-                            loop {
-                                // Wait for the interval
-                                interval.tick().await;
-                                // Execute the instruction
-                                match metric.execute(device, instruction, &query).await.map_err(
-                                    |e| {
-                                        tracing::error!("Error executing instruction: {}", e);
-                                        e
-                                    },
-                                )? {
-                                    // Check the condition
-                                    Some(data) => {
-                                        if wait_for.check_condition(&data) {
-                                            tracing::info!(
-                                                "Condition met. Starting the delay timer."
-                                            );
-                                            // Start the timer
-                                            if timer.is_none() {
-                                                timer = Some(Instant::now());
-                                            }
-                                        } else {
-                                            if timer.is_some() {
-                                                tracing::info!(
+                                // Loop until the condition is met
+                                loop {
+                                    // Wait for the interval
+                                    interval.tick().await;
+                                    // Execute the instruction
+                                    match metric
+                                        .execute(device, instruction, &query)
+                                        .await
+                                        .map_err(|e| {
+                                            tracing::error!("Error executing instruction: {}", e);
+                                            e
+                                        })? {
+                                        // Check the condition
+                                        Some(data) => {
+                                            if wait_for
+                                                .check_condition(&data.get(&device.name).unwrap())
+                                            {
+                                                // Start the timer
+                                                if timer.is_none() {
+                                                    tracing::info!(
+                                                        "Condition met. Starting the delay timer."
+                                                    );
+                                                    timer = Some(Instant::now());
+                                                }
+                                            } else {
+                                                if timer.is_some() {
+                                                    tracing::info!(
                                                     "Condition not met. Resetting the delay timer."
                                                 );
-                                                timer = None;
+                                                    timer = None;
+                                                }
                                             }
                                         }
-                                    }
-                                    // No data returned
-                                    None => {
-                                        if !already_notified {
-                                            tracing::error!(
+                                        // No data returned
+                                        None => {
+                                            // Start the timer
+                                            if timer.is_none() {
+                                                tracing::error!(
                                                 "No data returned. Falling back to the delay time."
                                             );
-                                            already_notified = true;
+                                                timer = Some(Instant::now());
+                                            }
                                         }
-                                        // Start the timer
-                                        if timer.is_none() {
-                                            timer = Some(Instant::now());
+                                    };
+                                    // Check if the timer has elapsed
+                                    if let Some(timer) = timer {
+                                        if timer.elapsed()
+                                            >= Duration::from_secs(wait_for.parameters.delay)
+                                        {
+                                            tracing::info!(
+                                                "Delay time elapsed. Continuing the pipeline."
+                                            );
+                                            break;
                                         }
-                                    }
-                                };
-                                // Check if the timer has elapsed
-                                if let Some(timer) = timer {
-                                    if timer.elapsed()
-                                        >= Duration::from_secs(wait_for.parameters.delay)
-                                    {
-                                        tracing::info!(
-                                            "Delay time elapsed. Continuing the pipeline."
-                                        );
-                                        break;
                                     }
                                 }
-                            }
-                            Ok(())
-                        });
+                                Ok(())
+                            });
                         Ok(None)
                     }
                     // Simple case: wait for a fixed amount of time
@@ -209,77 +248,255 @@ where
                 }
             }
             Step::Scan(scan) => {
-                // Prepare the datafile
-                let datafile = scan.create_datafile(_parameters_stack)?;
-                let mut file = match datafile {
-                    Some(datafile) => {
-                        tracing::info!("Creating datafile: {}", datafile.display());
-                        match std::fs::File::create(&datafile) {
-                            Ok(file) => Some(file),
-                            Err(e) => {
-                                tracing::error!("Error creating datafile: {}", e);
+                // Check the scan type just once instead of checking it in every loop
+                match &scan.scan_type {
+                    ScanType::Settle => {
+                        // Prepare the datafile
+                        let datafile = scan.create_datafile(_parameters_stack)?;
+                        let file = match datafile {
+                            Some(datafile) => {
+                                tracing::info!("Creating datafile: {}", datafile.display());
+                                match std::fs::File::create(&datafile) {
+                                    Ok(file) => Some(file),
+                                    Err(e) => {
+                                        tracing::error!("Error creating datafile: {}", e);
+                                        None
+                                    }
+                                }
+                            }
+                            None => {
+                                tracing::info!(
+                                    "No datafile defined. Skipping the datafile creation."
+                                );
                                 None
                             }
+                        };
+                        let mut writer = match file {
+                            Some(file) => Some(csv::Writer::from_writer(file)),
+                            None => None,
+                        };
+
+                        // Given that the scan loop can accept floating point numbers, we need to use a while loop
+                        let mut variable_parameter = scan.parameters.start;
+                        while variable_parameter <= scan.parameters.stop {
+                            // Update the parameters stack
+                            let mut parameters_stack = _parameters_stack.clone();
+                            parameters_stack.insert(
+                                scan.parameters.variable.clone(),
+                                Arguments::new(
+                                    scan.parameters.variable.clone(),
+                                    Data::Float(variable_parameter),
+                                ),
+                            );
+
+                            // Create a runtime to run async code
+                            let runtime = tokio::runtime::Builder::new_multi_thread()
+                                .worker_threads(1)
+                                .enable_all()
+                                .build()?;
+
+                            // Execute the scan metrics
+                            for metric in &scan.metrics {
+                                Pipeline::_execute(devices, metric, &parameters_stack)?;
+                            }
+
+                            // Response data
+                            let mut data = BTreeMap::new();
+                            let mut temp_map = BTreeMap::new();
+                            temp_map.insert(
+                                "Datetime".to_string(),
+                                Data::String(chrono::Utc::now().to_rfc3339()),
+                            );
+                            temp_map.insert(
+                                scan.parameters.variable.clone(),
+                                Data::Float(variable_parameter),
+                            );
+                            data.insert("".to_string(), temp_map);
+
+                            // Execute the scan measures
+                            let measure_results = runtime
+                                .block_on(scan.execute_measures(devices, &parameters_stack))?;
+                            data.extend(measure_results);
+
+                            // Write the data to the file
+                            match &mut writer {
+                                Some(writer) => {
+                                    writer.serialize(data).unwrap_or_else(|e| {
+                                        tracing::error!("Error writing data to the file: {}", e);
+                                    });
+                                }
+                                None => {
+                                    tracing::debug!("Data: {:#?}", data);
+                                }
+                            }
+
+                            // Next step
+                            variable_parameter += scan.parameters.step;
                         }
                     }
-                    None => {
-                        tracing::info!("No datafile defined. Skipping the datafile creation.");
-                        None
-                    }
-                };
-                let mut writer = match &mut file {
-                    Some(file) => Some(csv::Writer::from_writer(file)),
-                    None => None,
-                };
+                    ScanType::Sweep => {
+                        // Prepare the datafile
+                        let datafile = scan.create_datafile(_parameters_stack)?;
+                        let writer = match datafile {
+                            Some(file) => Some(Arc::new(Mutex::new(csv::Writer::from_path(file)?))),
+                            None => None,
+                        };
 
-                // Given that the scan loop can accept floating point numbers, we need to use a while loop
-                let mut variable_parameter = scan.parameters.start;
-                while variable_parameter <= scan.parameters.stop {
-                    // Update the parameters stack
-                    let mut parameters_stack = _parameters_stack.clone();
-                    parameters_stack.insert(
-                        scan.parameters.variable.clone(),
-                        Arguments::new(
-                            scan.parameters.variable.clone(),
-                            Data::Float(variable_parameter),
-                        ),
-                    );
+                        // Given that the scan loop can accept floating point numbers, we need to use a while loop
+                        let mut variable_parameter = scan.parameters.start;
+                        while variable_parameter <= scan.parameters.stop {
+                            // Update the parameters stack
+                            let mut parameters_stack = _parameters_stack.clone();
+                            parameters_stack.insert(
+                                scan.parameters.variable.clone(),
+                                Arguments::new(
+                                    scan.parameters.variable.clone(),
+                                    Data::Float(variable_parameter),
+                                ),
+                            );
 
-                    // Execute the scan metrics
-                    for metric in &scan.metrics {
-                        Pipeline::_execute(devices, metric, &parameters_stack)?;
-                    }
+                            // Create a runtime to run async code
+                            let runtime = tokio::runtime::Builder::new_multi_thread()
+                                .worker_threads(1)
+                                .enable_all()
+                                .build()?;
 
-                    // Response data
-                    let mut data = HashMap::new();
-                    data.insert(
-                        "Datetime".to_string(),
-                        Data::String(chrono::Utc::now().to_rfc3339()),
-                    );
-                    data.insert(
-                        scan.parameters.variable.clone(),
-                        Data::Float(variable_parameter),
-                    );
+                            // Create a metric flag to notify if the metric loop is done
+                            let is_metric_done = Arc::new(Mutex::new(false));
 
-                    // Execute the scan measures
-                    for measure in &scan.measures {
-                        let response = Pipeline::_execute(devices, measure, &parameters_stack)?;
-                        if let Some(response) = response {
-                            data.extend(response);
+                            // Create Arcs for the devices and parameters stack
+                            let devices = Arc::new(devices.clone());
+                            let scan = Arc::new(scan.clone());
+                            let parameters_stack = Arc::new(parameters_stack.clone());
+
+                            // Spawn a metric loop
+                            let metric_loop = {
+                                let devices = devices.clone();
+                                let scan = scan.clone();
+                                let parameters_stack = parameters_stack.clone();
+                                let is_metric_done = is_metric_done.clone();
+                                async move {
+                                    // Execute the scan metrics
+                                    for metric in &scan.metrics {
+                                        Pipeline::_execute(&devices, metric, &parameters_stack)?;
+                                    }
+                                    // Set the metric flag
+                                    match is_metric_done.lock() {
+                                        Ok(mut is_metric_done) => {
+                                            *is_metric_done = true;
+                                        }
+                                        Err(e) => {
+                                            tracing::error!("Error locking the metric flag: {}", e);
+                                        }
+                                    }
+                                    Ok(()) as Result<(), Box<dyn std::error::Error + Send + Sync>>
+                                }
+                            };
+
+                            // Spawn a measure loop
+                            let measure_loop = {
+                                let devices = devices.clone();
+                                let scan = scan.clone();
+                                let parameters_stack = parameters_stack.clone();
+                                let is_metric_done = is_metric_done.clone();
+                                let writer = writer.clone();
+
+                                async move {
+                                    // Variables used in the loop
+                                    let mut interval =
+                                        tokio::time::interval(Duration::from_millis(100)); // TODO: Make this configurable
+
+                                    // Loop until the condition is met
+                                    loop {
+                                        // Wait for the interval
+                                        interval.tick().await;
+
+                                        // Execute the scan measures
+                                        let measure_results = scan
+                                            .execute_measures(&devices, &parameters_stack)
+                                            .await
+                                            .map_err(|e| {
+                                                tracing::error!("Error executing measures: {}", e);
+                                                e
+                                            })?;
+
+                                        // Response data
+                                        let mut data = BTreeMap::new();
+                                        let mut temp_map = BTreeMap::new();
+                                        temp_map.insert(
+                                            "Datetime".to_string(),
+                                            Data::String(chrono::Utc::now().to_rfc3339()),
+                                        );
+                                        temp_map.insert(
+                                            scan.parameters.variable.clone(),
+                                            Data::Float(variable_parameter),
+                                        );
+                                        data.insert("".to_string(), temp_map);
+                                        data.extend(measure_results);
+
+                                        // Write the data to the file
+                                        if let Some(writer) = &writer {
+                                            let mut writer = writer
+                                                .lock()
+                                                .map_err(|e| {
+                                                    tracing::error!(
+                                                        "Error locking the writer: {}",
+                                                        e
+                                                    );
+                                                    e
+                                                })
+                                                .unwrap();
+                                            writer.serialize(data).map_err(|e| {
+                                                tracing::error!(
+                                                    "Error writing data to the file: {}",
+                                                    e
+                                                );
+                                                e
+                                            })?;
+                                        } else {
+                                            tracing::debug!("Data: {:#?}", data);
+                                        }
+
+                                        // Check if the metric loop is done
+                                        match is_metric_done.lock() {
+                                            Ok(is_metric_done) => {
+                                                if *is_metric_done {
+                                                    break;
+                                                }
+                                            }
+                                            Err(e) => {
+                                                tracing::error!(
+                                                    "Error locking the metric flag: {}",
+                                                    e
+                                                );
+                                            }
+                                        }
+                                    }
+                                    Ok(()) as Result<(), Box<dyn std::error::Error + Send + Sync>>
+                                }
+                            };
+
+                            // Instantiate the tasks
+                            let metric_loop = tokio::task::spawn(metric_loop);
+                            let measure_loop = tokio::task::spawn(measure_loop);
+
+                            // Wait for the tasks to finish
+                            let tasks_result = runtime
+                                .block_on(async { tokio::try_join!(metric_loop, measure_loop) });
+                            match tasks_result {
+                                Ok(_) => {
+                                    tracing::trace!("Tasks completed successfully");
+                                }
+                                Err(e) => {
+                                    tracing::error!("Error executing tasks: {}", e);
+                                }
+                            }
+
+                            // Next step
+                            variable_parameter += scan.parameters.step;
                         }
                     }
-
-                    // Write the data to the file
-                    if let Some(writer) = &mut writer {
-                        writer.serialize(data).unwrap_or_else(|e| {
-                            tracing::error!("Error writing data to the file: {}", e);
-                        });
-                    }
-
-                    // Next step
-                    variable_parameter += scan.parameters.step;
                 }
-
                 Ok(None)
             }
         }
@@ -291,7 +508,7 @@ impl DeviceInstruction {
     fn get_device<'a, Protocol>(
         &'a self,
         devices: &'a HashMap<String, Device<Protocol>>,
-    ) -> Result<&'a Device<Protocol>, Box<dyn std::error::Error>>
+    ) -> Result<&'a Device<Protocol>, Box<dyn std::error::Error + Send + Sync>>
     where
         Protocol: DeserializeOwned + Query + std::fmt::Debug + std::clone::Clone,
     {
@@ -311,8 +528,8 @@ impl DeviceInstruction {
     fn merge_parameters<Protocol>(
         &self,
         device: &Device<Protocol>,
-        parameters_stack: &HashMap<String, Arguments>,
-    ) -> HashMap<String, Arguments>
+        parameters_stack: &BTreeMap<String, Arguments>,
+    ) -> BTreeMap<String, Arguments>
     where
         Protocol: DeserializeOwned + Query + std::fmt::Debug + std::clone::Clone,
     {
@@ -336,7 +553,7 @@ impl DeviceInstruction {
     fn get_instruction<'a, Protocol>(
         &'a self,
         device: &'a Device<Protocol>,
-    ) -> Result<&'a Instruction, Box<dyn std::error::Error>>
+    ) -> Result<&'a Instruction, Box<dyn std::error::Error + Send + Sync>>
     where
         Protocol: DeserializeOwned + Query + std::fmt::Debug + std::clone::Clone,
     {
@@ -357,8 +574,8 @@ impl DeviceInstruction {
     fn render_query<Protocol>(
         &self,
         device: &Device<Protocol>,
-        parameters: &HashMap<String, Arguments>,
-    ) -> Result<String, Box<dyn std::error::Error>>
+        parameters: &BTreeMap<String, Arguments>,
+    ) -> Result<String, Box<dyn std::error::Error + Send + Sync>>
     where
         Protocol: DeserializeOwned + Query + std::fmt::Debug + std::clone::Clone,
     {
@@ -382,7 +599,10 @@ impl DeviceInstruction {
         device: &Device<Protocol>,
         instruction: &Instruction,
         query: &str,
-    ) -> Result<Option<HashMap<String, Data>>, Box<dyn std::error::Error>>
+    ) -> Result<
+        Option<BTreeMap<String, BTreeMap<String, Data>>>,
+        Box<dyn std::error::Error + Send + Sync>,
+    >
     where
         Protocol: DeserializeOwned + Query + std::fmt::Debug + std::clone::Clone,
     {
@@ -392,16 +612,19 @@ impl DeviceInstruction {
 
         // Parse the response
         let data = match response {
-            Some(response) => Some(
-                instruction
+            Some(response) => {
+                let response = instruction
                     .response
                     .as_ref()
                     .ok_or_else(|| {
                         tracing::error!("Instruction was not expecting a response");
                         "Instruction was not expecting a response"
                     })?
-                    .parse(&response)?,
-            ),
+                    .parse(&response)?;
+                let mut data = BTreeMap::new();
+                data.insert(self.device.clone(), response);
+                Some(data)
+            }
             None => None,
         };
         tracing::debug!(?data);
@@ -412,7 +635,7 @@ impl DeviceInstruction {
 
 impl WaitFor {
     #[tracing::instrument(name = "WaitFor::check_condition", level = "debug")]
-    fn check_condition(&self, data: &HashMap<String, Data>) -> bool {
+    fn check_condition(&self, data: &BTreeMap<String, Data>) -> bool {
         // Get the value name
         let attribute = match &self.parameters.name {
             Some(name) => name,
@@ -477,8 +700,8 @@ impl Scan {
     #[tracing::instrument(name = "Scan::create_datafile", level = "debug")]
     fn create_datafile(
         &self,
-        parameters: &HashMap<String, Arguments>,
-    ) -> Result<Option<PathBuf>, Box<dyn std::error::Error>> {
+        parameters: &BTreeMap<String, Arguments>,
+    ) -> Result<Option<PathBuf>, Box<dyn std::error::Error + Send + Sync>> {
         // Get the template datafile name
         let template = match &self.datafile {
             Some(datafile) => datafile,
@@ -507,5 +730,47 @@ impl Scan {
         tracing::debug!(?rendered_datafile);
 
         Ok(Some(PathBuf::from(rendered_datafile)))
+    }
+
+    #[tracing::instrument(name = "Scan::execute_measures", level = "debug")]
+    async fn execute_measures<Protocol>(
+        &self,
+        devices: &HashMap<String, Device<Protocol>>,
+        parameters: &BTreeMap<String, Arguments>,
+    ) -> Result<BTreeMap<String, BTreeMap<String, Data>>, Box<dyn std::error::Error + Send + Sync>>
+    where
+        Protocol:
+            DeserializeOwned + Query + std::fmt::Debug + std::clone::Clone + Send + Sync + 'static,
+    {
+        // Create a join set - a set of futures that can be joined
+        let mut futures = JoinSet::new();
+
+        // Execute the measures
+        tracing::trace!("Executing measures");
+        for measure in &self.measures {
+            // Clone the variables
+            // TODO: Find a better way to clone the variables - Rc and Arc
+            let devices = devices.clone();
+            let measure = measure.clone();
+            let parameters = parameters.clone();
+
+            tracing::trace!("Spawning measure");
+            futures.spawn(async move {
+                let response = Pipeline::_execute(&devices, &measure, &parameters);
+                response
+            });
+        }
+
+        // Collect the data
+        let mut data = BTreeMap::new();
+        tracing::trace!("Collecting data");
+        while let Some(response) = futures.join_next().await {
+            let response = response??;
+            if let Some(response) = response {
+                data.extend(response);
+            }
+        }
+        tracing::debug!(?data);
+        Ok(data)
     }
 }
