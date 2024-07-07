@@ -2,7 +2,7 @@
 instructions:
   - name: Get temperature
     command:
-      query: "INPUT {{channel}}:TEMPERATURE?"
+      query: "INPUT {{channel}}:TEMP?\n"
       parameters:
         - name: channel
           type: string
@@ -15,7 +15,7 @@ instructions:
     description: Reports the current temperature reading on any of the input channels.
   - name: Set display units
     command:
-      query: "INPUT {{channel}}:UNITS {{units}}"
+      query: "INPUT {{channel}}:UNITS {{units}}\n"
       parameters:
         - name: channel
           type: string
@@ -32,7 +32,7 @@ instructions:
     description: Sets the display units of temperature used by the specific input channel.
   - name: Get display units
     command:
-      query: "INPUT {{channel}}:UNITS?"
+      query: "INPUT {{channel}}:UNITS?\n"
       parameters:
         - name: channel
           type: string

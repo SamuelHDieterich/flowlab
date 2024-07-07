@@ -1,9 +1,12 @@
 devices:
   - name: 4G
-    description: Magnet field controller
+    description: Magnet power supply controller - Model 4G
     protocol:
-      ip: 192.168.4.1
-      port: 5000
+      ip: 192.168.1.4
+      port: 4444
     instructions:
       - path: ./config/instructions/SCPI.yaml
       - path: ./config/instructions/4G.yaml
+    default_arguments:
+      - name: units
+        value: G

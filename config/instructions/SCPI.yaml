@@ -2,7 +2,7 @@
 instructions:
   - name: Device information
     command:
-      query: "*IDN?"
+      query: "*IDN?\n"
     response:
       format: "{{manufacturer}},{{model}},{{serial_number}},{{firmware_version}}"
       parameters:
@@ -19,5 +19,5 @@ instructions:
     description: Returns the manufacturer, model number, serial number, and firmware version of the device.
   - name: Reset the device
     command:
-      query: "*RST"
+      query: "*RST\n"
     description: Reset the instrument. Depending on the instrument, this may reset the device to a known state or reboot the device.

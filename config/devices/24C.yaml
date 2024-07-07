@@ -1,0 +1,42 @@
+devices:
+  - name: 24C
+    description: Temperature controller - Model 24C
+    protocol:
+      ip: 192.168.1.2
+      port: 5000
+    instructions:
+      - path: ./config/instructions/SCPI.yaml
+      - path: ./config/instructions/24C.yaml
+    default_arguments:
+      - name: units
+        value: K
+  - name: 24C - Sample
+    description: Temperature controller - Model 24C - Sample
+    protocol:
+      ip: 192.168.1.2
+      port: 5000
+    instructions:
+      - path: ./config/instructions/SCPI.yaml
+      - path: ./config/instructions/24C.yaml
+    default_arguments:
+      - name: units
+        value: K
+      - name: channel
+        value: A
+      - name: loop
+        value: 1
+  - name: 24C - VTI
+    description: Temperature controller - Model 24C - VTI
+    protocol:
+      ip: 192.168.1.2
+      port: 5000
+    instructions:
+      - path: ./config/instructions/SCPI.yaml
+      - path: ./config/instructions/24C.yaml
+    default_arguments:
+      - name: units
+        value: K
+      - name: channel
+        value: B
+      - name: loop
+        value: 2

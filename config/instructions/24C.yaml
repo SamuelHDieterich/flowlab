@@ -1,0 +1,54 @@
+# 2_Model 24C Temperature Controller_Users Manual.pdf
+instructions:
+  - name: Get temperature
+    command:
+      query: "INPUT {{channel}}:UNITS {{units}};INPUT? {{channel}}\n"
+      parameters:
+        - name: channel
+          type: string
+          values:
+            - A
+            - B
+            - C
+            - D
+        - name: units
+          type: string
+          values:
+            - K
+            - C
+            - F
+            - S
+          default: K
+          description: "The units to display the temperature in, options include: K (Kelvin), C (Celsius), F (Fahrenheit), or S (primitive sensor units, Volts or Ohms)."
+    response:
+      format: "{{temperature}}"
+      parameters:
+        - name: temperature
+          type: float
+    description: Get the temperature of the specified channel.
+  - name: Set temperature
+    command:
+      query: "LOOP {{loop}}:SETP {{temperature}};CONTROL\n"
+      parameters:
+        - name: loop
+          type: integer
+          values:
+            - 1
+            - 2
+        - name: temperature
+          type: float
+    description: Set the temperature of the specified loop to the specified value.
+  - name: Set temperature with rate
+    command:
+      query: "LOOP {{loop}}:RATE {{rate}}:SETP {{temperature}};CONTROL\n"
+      parameters:
+        - name: loop
+          type: integer
+          values:
+            - 1
+            - 2
+        - name: rate
+          type: float
+        - name: temperature
+          type: float
+    description: Set the temperature of the specified loop to the specified value with the specified rate.
