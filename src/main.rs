@@ -87,7 +87,7 @@ fn setup_logging(
         .pretty()
         .with_line_number(true)
         .with_target(false)
-        .with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE)
+        // .with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE)
         .with_file(true)
         .with_writer(log_non_blocking)
         .with_filter(EnvFilter::from_default_env().add_directive(tracing::Level::TRACE.into()));
@@ -96,7 +96,7 @@ fn setup_logging(
         .with_ansi(false)
         .with_line_number(true)
         .with_target(false)
-        .with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE)
+        // .with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE)
         .with_file(true)
         .json()
         .with_writer(jsonl_non_blocking)
@@ -127,7 +127,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         PathBuf::from("logs"),
         PathBuf::from(format!(
             "flowlab-{}",
-            chrono::Local::now().format("%Y-%m-%d-%H-%M-%S")
+            chrono::Local::now().format("%Y-%m-%d_%H-%M-%S")
         )),
         cli.log_level,
     )?;

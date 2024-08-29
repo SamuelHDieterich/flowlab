@@ -66,7 +66,7 @@ where
             "PIPELINE_START_TIME".to_string(),
             Arguments::new(
                 "PIPELINE_START_TIME".to_string(),
-                Data::String(pipeline_start_time.to_rfc3339()),
+                Data::String(pipeline_start_time.format("%Y-%m-%d_%H-%M-%S").to_string()),
             ),
         );
 
@@ -165,6 +165,18 @@ where
                         // Render the query
                         let query = metric.render_query(device, &parameters)?;
 
+                        // If inside a Scan, target should already be defined in parameters
+                        let mut target = None;
+                        if wait_for.parameters.name.is_some() & wait_for.parameters.value.is_none()
+                        {
+                            let key = wait_for.parameters.name.clone().unwrap();
+                            let arg = parameters.get(&key);
+                            target = match arg {
+                                Some(value) => Some(value.value.clone()),
+                                _ => None,
+                            }
+                        }
+
                         // Create a runtime to run async code
                         let runtime = tokio::runtime::Builder::new_multi_thread()
                             .worker_threads(1)
@@ -192,9 +204,10 @@ where
                                         })? {
                                         // Check the condition
                                         Some(data) => {
-                                            if wait_for
-                                                .check_condition(&data.get(&device.name).unwrap())
-                                            {
+                                            if wait_for.check_condition(
+                                                &data.get(&device.name).unwrap(),
+                                                &target,
+                                            ) {
                                                 // Start the timer
                                                 if timer.is_none() {
                                                     tracing::info!(
@@ -278,7 +291,14 @@ where
 
                         // Given that the scan loop can accept floating point numbers, we need to use a while loop
                         let mut variable_parameter = scan.parameters.start;
-                        while variable_parameter <= scan.parameters.stop {
+                        let sign = scan.parameters.stop > scan.parameters.start;
+                        while if sign {
+                            variable_parameter <= scan.parameters.stop
+                        } else {
+                            variable_parameter >= scan.parameters.stop
+                        } {
+                            tracing::info!(variable_parameter);
+
                             // Update the parameters stack
                             let mut parameters_stack = _parameters_stack.clone();
                             parameters_stack.insert(
@@ -291,7 +311,7 @@ where
 
                             // Create a runtime to run async code
                             let runtime = tokio::runtime::Builder::new_multi_thread()
-                                .worker_threads(1)
+                                .worker_threads(4)
                                 .enable_all()
                                 .build()?;
 
@@ -314,9 +334,18 @@ where
                             data.insert("".to_string(), temp_map);
 
                             // Execute the scan measures
-                            let measure_results = runtime
-                                .block_on(scan.execute_measures(devices, &parameters_stack))?;
-                            data.extend(measure_results);
+                            // let measure_results = runtime
+                            //     .block_on(scan.execute_measures(devices, &parameters_stack))?;
+                            // let devices = Arc::new(devices.clone());
+                            // let parameters_stack = Arc::new(parameters_stack.clone());
+                            // let measure_handle = tokio::spawn(async move {
+                            //     scan.execute_measures(devices, &parameters_stack).await
+                            // });
+                            // let measure_results = runtime.block_on(measure_handle)??;
+
+                            // data.extend(measure_results);
+
+                            tracing::info!("{:#?}", data);
 
                             // Write the data to the file
                             match &mut writer {
@@ -344,7 +373,12 @@ where
 
                         // Given that the scan loop can accept floating point numbers, we need to use a while loop
                         let mut variable_parameter = scan.parameters.start;
-                        while variable_parameter <= scan.parameters.stop {
+                        let sign = scan.parameters.stop > scan.parameters.start;
+                        while if sign {
+                            variable_parameter <= scan.parameters.stop
+                        } else {
+                            variable_parameter >= scan.parameters.stop
+                        } {
                             // Update the parameters stack
                             let mut parameters_stack = _parameters_stack.clone();
                             parameters_stack.insert(
@@ -611,31 +645,40 @@ impl DeviceInstruction {
         tracing::debug!(?response);
 
         // Parse the response
-        let data = match response {
-            Some(response) => {
-                let response = instruction
-                    .response
-                    .as_ref()
-                    .ok_or_else(|| {
-                        tracing::error!("Instruction was not expecting a response");
-                        "Instruction was not expecting a response"
-                    })?
-                    .parse(&response)?;
-                let mut data = BTreeMap::new();
-                data.insert(self.device.clone(), response);
-                Some(data)
-            }
-            None => None,
-        };
-        tracing::debug!(?data);
-
-        Ok(data)
+        // Only extract the response from instructions that are set for it
+        // This can avoid problems with instructions that return just an ACK
+        if instruction.response.is_some() {
+            let data = match response {
+                Some(response) => {
+                    let response = instruction
+                        .response
+                        .as_ref()
+                        .ok_or_else(|| {
+                            tracing::error!("Instruction was not expecting a response");
+                            "Instruction was not expecting a response"
+                        })?
+                        .parse(&response)?;
+                    let mut data = BTreeMap::new();
+                    data.insert(self.device.clone(), response);
+                    Some(data)
+                }
+                None => None,
+            };
+            tracing::debug!(?data);
+            Ok(data)
+        } else {
+            Ok(None)
+        }
     }
 }
 
 impl WaitFor {
     #[tracing::instrument(name = "WaitFor::check_condition", level = "debug")]
-    fn check_condition(&self, data: &BTreeMap<String, Data>) -> bool {
+    fn check_condition(
+        &self,
+        data: &BTreeMap<String, Data>,
+        external_target: &Option<Data>,
+    ) -> bool {
         // Get the value name
         let attribute = match &self.parameters.name {
             Some(name) => name,
@@ -652,14 +695,21 @@ impl WaitFor {
                 return true;
             }
         };
-        // Get teh target value
-        let target = match self.parameters.value {
-            Some(value) => value,
-            None => {
-                tracing::error!("Target value not defined. Skipping the condition check.");
-                return true;
+        // Get the target value
+        let target: f64;
+        match external_target {
+            Some(Data::Float(value)) => target = *value,
+            Some(Data::Integer(value)) => target = *value as f64,
+            _ => {
+                target = match self.parameters.value {
+                    Some(value) => value,
+                    None => {
+                        tracing::error!("Target value not defined. Skipping the condition check.");
+                        return true;
+                    }
+                };
             }
-        };
+        }
         // Get the acceptable tolerance/threshold value
         let tolerance = match self.parameters.tolerance {
             Some(tolerance) => tolerance,
