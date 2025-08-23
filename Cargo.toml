@@ -1,6 +1,22 @@
-[package]
-name = "flowlab"
-version = "0.2.0"
-edition = "2024"
+[workspace]
+members = ["crates/*"]
+resolver = "3"
 
-[dependencies]
+[workspace.package]
+version = "0.2.0"
+description = "An open-source application to control and monitor lab equipments."
+keywords = ["lab", "monitoring", "control"]
+homepage = "https://github.com/SamuelHDieterich/flowlab"
+repository = "https://github.com/SamuelHDieterich/flowlab"
+readme = "README.md"
+license-file = "LICENSE"
+edition = "2024"
+authors = ["Samuel H. Dieterich"]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+
+[profile.dev]
+opt-level = 2
