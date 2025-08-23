@@ -1,6 +1,6 @@
-> [!WARNING]
-> This branch will no longer be updated and is only kept for historical purposes.
-> Further development will continue in other branches.
+> [!CAUTION]
+> This project is going through a full redesign and refactoring process. In its current state, it may be unstable and not all features are fully implemented.
+> Do not use in production. Use it at your own risk.
 
 <h1 align="center">
 <image src="assets/flowlab_logo.png" width="350">
@@ -14,11 +14,7 @@ An open-source application to control and monitor lab equipments.
 
 - [Table of Contents](#table-of-contents)
 - [About](#about)
-- [Disclaimer](#disclaimer)
 - [Roadmap](#roadmap)
-  - [Application library](#application-library)
-  - [MVP application](#mvp-application)
-  - [User interface](#user-interface)
 - [License](#license)
 
 ## About
@@ -27,35 +23,14 @@ Flowlab is an open-source application written in Rust to control and monitor lab
 
 ⚠️ Warning: This project is still in its early stages of development, so it is not ready for production use yet.
 
-## Disclaimer
-
-This application is being developed as part of my undergraduate engineering physics term paper at the Universidade Federal do Rio Grande do Sul (UFRGS). Therefore, although it is planned to be a general-purpose application, it is currently being developed with the needs of the Physics Institute of UFRGS in mind, more specifically to control and monitor the CMAG9 criostat of the Laboratório de Resistividade, Magnetismo e Supercondutividade (LabRMS).
-
-[Term Paper](http://hdl.handle.net/10183/279198)
+This project was initiated developed as part of my undergraduate engineering physics term paper at the Universidade Federal do Rio Grande do Sul (UFRGS). If you want to read more about it, you can find it [here](http://hdl.handle.net/10183/279198). Go to the `term-paper` branch to see the code used in that deliverable.
 
 ## Roadmap
 
-### Application library
-- [x] Develop the building blocks of the application library:
-  - [x] Device configuration abstraction
-  - [x] Device commands abstraction
-  - [x] Pipeline declaration abstraction
-- [ ] Device protocol implementations:
-  - [x] TCP/IP
-  - [ ] GPIB
-  - [ ] Serial
+As part of the rewrite, I plan to keep some of the ideas from the original implementation but improve upon them based on the concepts I'm still learning.
 
-### MVP application
-- [ ] Develop the MVP application:
-  - [ ] Device configuration
-  - [ ] Device commands
-  - [ ] Pipeline declaration
-  - [ ] Pipeline execution
+TODO: Define the phases of the project and their goals.
 
-### User interface
-- [ ] CLI application
-- [ ] TUI application
-- [ ] GUI application
 
 ## License
 
