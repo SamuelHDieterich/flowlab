@@ -2,8 +2,9 @@
 .vscode
 
 # Build file for the project
-**/target
+/target
 build
+result
 
 # Ignore test logs
 logs
