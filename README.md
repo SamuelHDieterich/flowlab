@@ -1,3 +1,7 @@
+> [!WARNING]
+> This branch will no longer be updated and is only kept for historical purposes.
+> Further development will continue in other branches.
+
 <h1 align="center">
 <image src="assets/flowlab_logo.png" width="350">
 </h1>
@@ -26,6 +30,8 @@ Flowlab is an open-source application written in Rust to control and monitor lab
 ## Disclaimer
 
 This application is being developed as part of my undergraduate engineering physics term paper at the Universidade Federal do Rio Grande do Sul (UFRGS). Therefore, although it is planned to be a general-purpose application, it is currently being developed with the needs of the Physics Institute of UFRGS in mind, more specifically to control and monitor the CMAG9 criostat of the Laboratório de Resistividade, Magnetismo e Supercondutividade (LabRMS).
+
+[Term Paper](http://hdl.handle.net/10183/279198)
 
 ## Roadmap
 
