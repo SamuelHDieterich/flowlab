@@ -1,4 +1,4 @@
-use flowlab_core::device::serde as devices;
+use flowlab_core::serde::device;
 
 #[test]
 fn deserialize_device() {
@@ -13,7 +13,7 @@ fn deserialize_device() {
       - ../instructions/TM612/**/*
     "#;
 
-    let device: devices::Device = serde_yaml::from_str(yaml).unwrap();
+    let device: device::Device = serde_yaml::from_str(yaml).unwrap();
 
     assert_eq!(device.name, "TM612");
     assert_eq!(device.description, Some("Temperature Monitor 612".into()));
