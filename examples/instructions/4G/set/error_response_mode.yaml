@@ -1,0 +1,11 @@
+name: Set error response mode
+description: Enables or disables error messages when the USB interface is used. It is much easier to handle errors under program control when using the USB interface if error messages are disabled, but it is desirable to enable error messages if a terminal program is used to interactively control and query the 4G.
+command:
+  format: "ERROR {{mode}}\n"
+  parameters:
+    - name: mode
+      description: "0 = disable error reporting, 1 = enable error reporting."
+      type: number
+      values:
+        - 0
+        - 1

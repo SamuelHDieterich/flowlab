@@ -1,0 +1,18 @@
+name: Set sweep rate
+description: Sets the charge rate in amps/second for a selected range. A range parameter of 0, 1, 2, 3, and 4 will select Range 1, 2, 3, 4, or 5 sweep rates as displayed in the Rates Menu. A range parameter of 5 selects the Fast mode sweep rate DOWN command.
+command:
+  format: "RATE {{rate}} {{sweep_rate}}\n"
+  parameters:
+    - name: rate
+      description: Do not use any other value besides 0 unless you know what you are doing.
+      type: number
+      values:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+    - name: sweep_rate
+      description: Make sure to not set a sweep rate that is greater than the maximum rate of the power supply per each magnetic field range.
+      type: number

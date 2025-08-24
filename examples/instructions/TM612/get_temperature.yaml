@@ -1,0 +1,14 @@
+name: Get temperature
+description: Reports the current temperature reading on any of the input channels.
+command:
+  format: "INPUT {{channel}}:TEMP?\n"
+  parameters:
+    - name: channel
+      description: "The channel identification, options include: number (example: 0), characther (example: A), or channel ID (example: CHA)."
+      type: string
+response:
+  format: "{{temperature}}"
+  parameters:
+    - name: temperature
+      description: "The current temperature reading on the specified channel."
+      type: number

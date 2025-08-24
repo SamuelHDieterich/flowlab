@@ -1,0 +1,9 @@
+name: Set field
+description: "Sets the magnet current shown on the display. The supply must be in standby or a command error will be returned. The value must be supplied in the selected units - amperes or field (kG). If Shim Mode is enabled, the persistent mode current displayed for the named shim is set if the shim parameter is provided."
+command:
+  format: "IMAG {{field}}\n"
+  parameters:
+    - name: field
+      description: The magnet current to set.
+      type: number
+      default: 0.0

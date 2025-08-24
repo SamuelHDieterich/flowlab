@@ -1,0 +1,11 @@
+name: Set units
+description: Sets the units to be used for all input and display operations. Units may be set to Amps or Gauss. The unit will autorange to display Gauss, Kilogauss or Tesla.
+command:
+  format: "UNITS {{units}}\n"
+  parameters:
+    - name: units
+      type: string
+      values:
+        - A # Amperes
+        - G # Gauss
+      default: G

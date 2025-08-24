@@ -1,0 +1,15 @@
+name: Get magnet current
+description: "Returns the magnet current (or magnetic field strength) in the present units. If the persistent switch heater is ON the magnet current returned will be the same as the power supply output current. If the persistent switch heater is off, the magnet current will be the value of the power supply output current when the persistent switch heater was last turned off. The magnet current will be set to zero if the power supply detects a quench."
+command: "IMAG?\n"
+response:
+  format: "{{magnet_current}} {{units}}"
+  parameters:
+    - name: magnet_current
+      description: "The magnet current or field strength."
+      type: number
+    - name: units
+      description: "The units of the magnet current or field strength."
+      type: string
+      values:
+        - A # Amperes
+        - kG # Kilogauss

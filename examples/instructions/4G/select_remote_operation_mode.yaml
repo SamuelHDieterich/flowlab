@@ -1,0 +1,3 @@
+name: Select remote operation mode
+description: Takes control of the 4G via the remote interface. All buttons on the front panel are disabled except the Local button. This command will be rejected if the menu system is being accessed via the front panel or if LOCAL has been selected via the Local button on the front panel. Pressing the Local button again when the menu is not selected will allow this command to be executed. This command is only necessary for USB operation since the IEEE-488 interface provides for bus level control of the Remote and Lock controls.
+command: "REMOTE\n"

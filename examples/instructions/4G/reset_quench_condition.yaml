@@ -1,0 +1,3 @@
+name: Reset quench condition
+description: Resets a power supply quench condition and returns the supply to STANDBY.
+command: "QRESET\n"

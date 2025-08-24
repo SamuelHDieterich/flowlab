@@ -1,0 +1,26 @@
+name: Select SHIM
+description: Selects a shim to be controlled or queried.  It also allows selected shims or all shims to be disabled or enabled. The command is only valid when operating in SHIM mode. The switch heater must be off when making a shim selection.
+command:
+  format: "SHIM {{status}} {{selection}}\n"
+  parameters:
+    - name: status # Optional
+      type: string
+      values:
+        - Enable
+        - Disable
+    - name: selection
+      type: string
+      values:
+        - Z
+        - Z2
+        - Z3
+        - Z4
+        - X
+        - Y
+        - ZX
+        - ZY
+        - C2
+        - S2
+        - Z2X
+        - Z2Y
+        - All

@@ -1,0 +1,14 @@
+name: Get field
+description: "Queries the magnetic field strength and returns control to the front panel."
+command: "IMAG?; LOCAL\n"
+response:
+  format: "{{magnet_current}} {{units}}"
+  parameters:
+    - name: magnet_current
+      description: The current magnetic field strength.
+      type: number
+    - name: units
+      type: string
+      values:
+        - A # Amperes
+        - kG # kiloGauss

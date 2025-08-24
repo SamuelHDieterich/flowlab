@@ -1,0 +1,17 @@
+name: Set display units
+description: Sets the display units of temperature used by the specific input channel.
+command:
+  format: "INPUT {{channel}}:UNITS {{units}}\n"
+  parameters:
+    - name: channel
+      description: "The channel identification, options include: number (example: 0), characther (example: A), or channel ID (example: CHA)."
+      type: string
+    - name: units
+      description: "The display units of temperature to set for the specified channel."
+      type: string
+      values:
+        - K
+        - C
+        - F
+        - S
+      default: K

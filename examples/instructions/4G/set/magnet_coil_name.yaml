@@ -1,0 +1,8 @@
+name: Set magnet coil name
+description: Sets the name of the magnet coil. The name is displayed on the front panel display.
+command:
+  format: "NAME {{name}}\n"
+  parameters:
+    - name: name
+      description: "The name of the magnet coil."
+      type: string

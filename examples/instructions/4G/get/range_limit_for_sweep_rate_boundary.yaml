@@ -1,0 +1,21 @@
+name: Get range limit for sweep rate boundary
+description: Queries the charge rate in amps/second for a selected range. A range parameter of 0 to 4 will select Range 1 through 5 sweep rates as displayed in the Rates Menu. A range parameter of 5 queries the Fast mode sweep rate.
+command:
+  format: "RATE? {{range}}\n"
+  parameters:
+    - name: range
+      description: The range for which to query the sweep rate.
+      type: number
+      values:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+response:
+  format: "{{sweep_rate}}"
+  parameters:
+    - name: sweep_rate
+      description: The charge rate in amps/second for the selected range.
+      type: number

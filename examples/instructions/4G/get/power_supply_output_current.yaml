@@ -1,0 +1,15 @@
+name: Get power supply output current
+description: Returns the power supply output current (or magnetic field strength) in the present units.
+command: "IOUT?\n"
+response:
+  format: "{{output_current}}{{units}}"
+  parameters:
+    - name: output_current
+      description: "The power supply output current or field strength."
+      type: number
+    - name: units
+      description: "The units of the power supply output current or field strength."
+      type: string
+      values:
+        - A # Amperes
+        - G # Gauss

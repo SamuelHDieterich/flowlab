@@ -1,0 +1,11 @@
+name: Set field with sweep rate
+description: "Sets the magnetic field strength with a sweep rate and returns control to the front panel."
+command:
+  query: "REMOTE; UNIT G; RATE 0 {{sweep_rate}}; {% if field > 0 %}ULIM {{field}}; SWEEP UP{% elif field < 0 %}LLIM {{field}}; SWEEP DOWN{% else %}SWEEP ZERO{% endif %}; LOCAL\n"
+  parameters:
+    - name: sweep_rate
+      description: The rate at which the magnetic field strength is changed.
+      type: number
+    - name: field
+      description: The target magnetic field strength.
+      type: number

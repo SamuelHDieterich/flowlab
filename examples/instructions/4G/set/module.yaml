@@ -1,0 +1,11 @@
+name: Set module
+description: Selects the module for subsequent remote commands. A command error is returned if only one module is installed.
+command:
+  format: "CHAN {{module}}\n"
+  parameters:
+    - name: module
+      description: "The module to select (1 or 2)."
+      type: number
+      values:
+        - 1
+        - 2

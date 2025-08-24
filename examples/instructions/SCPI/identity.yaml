@@ -1,0 +1,18 @@
+name: Identify
+description: "Retrieves information about the connected SCPI device."
+command: "*IDN?\n"
+response:
+  format: "{{manufacturer}},{{model}},{{serial_number}},{{firmware_version}}"
+  parameters:
+    - name: manufacturer
+      description: "The manufacturer of the device."
+      type: string
+    - name: model
+      description: "The model number of the device."
+      type: string
+    - name: serial_number
+      description: "The serial number of the device."
+      type: string
+    - name: firmware_version
+      description: "The firmware version of the device."
+      type: string

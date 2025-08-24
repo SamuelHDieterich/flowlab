@@ -1,0 +1,12 @@
+name: Get selected operating mode
+description: Returns the selected operating mode.
+command: "MODE?\n"
+response:
+  format: "{{mode}}"
+  parameters:
+    - name: mode
+      description: "The selected operating mode."
+      type: string
+      values:
+        - Shim
+        - Manual

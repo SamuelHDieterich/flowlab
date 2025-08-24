@@ -1,0 +1,28 @@
+name: Get temperature
+description: Gets the temperature of the specified channel.
+command:
+  format: "INPUT {{channel}}:UNITS {{units}};INPUT? {{channel}}\n"
+  parameters:
+    - name: channel
+      description: "The channel identification (A-D)."
+      type: string
+      values:
+        - A
+        - B
+        - C
+        - D
+    - name: units
+      description: "The display units of temperature to set for the specified channel."
+      type: string
+      values:
+        - K
+        - C
+        - F
+        - S
+      default: K
+  response:
+    format: "{{temperature}}"
+    parameters:
+      - name: temperature
+        description: "The current temperature reading on the specified channel."
+        type: number

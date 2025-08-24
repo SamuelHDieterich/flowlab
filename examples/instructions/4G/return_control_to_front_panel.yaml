@@ -1,0 +1,3 @@
+name: Return control to front panel
+description: Returns control of the device to the front panel. RS-232 only.
+command: "LOCAL\n"

@@ -1,0 +1,17 @@
+name: Set temperature with rate
+description: Sets the temperature of the specified loop to the specified value with the specified rate.
+command:
+  format: "LOOP {{loop}}:RATE {{rate}}:SETP {{temperature}};CONTROL\n"
+  parameters:
+    - name: loop
+      description: "The loop identification (1 or 2)."
+      type: number
+      values:
+        - 1
+        - 2
+    - name: rate
+      description: "The rate at which to change the temperature."
+      type: number
+    - name: temperature
+      description: "The temperature value to set for the specified loop."
+      type: number
