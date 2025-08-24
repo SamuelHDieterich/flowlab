@@ -1,0 +1,8 @@
+name: 24C
+description: Temperature controller - Model 24C
+protocol:
+  ip: 192.168.1.2
+  port: 5000
+instructions:
+  - ../instructions/SCPI/**/*
+  - ../instructions/24C/**/*
