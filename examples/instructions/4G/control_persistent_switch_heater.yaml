@@ -1,0 +1,11 @@
+name: Control persistent switch heater
+description: Turns the persistent switch heater on or off. The persistent switch heater is used to maintain the magnet current when the power supply is in standby mode. The persistent switch heater is automatically turned off when the power supply is turned on.
+command:
+  format: "PSHTR {{state}}\n"
+  parameters:
+    - name: state
+      description: "The state of the persistent switch heater."
+      type: string
+      values:
+        - ON
+        - OFF

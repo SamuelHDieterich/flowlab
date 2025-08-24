@@ -1,0 +1,3 @@
+name: Reset
+description: "Resets the instrument. Depending on the instrument, this may reset the device to a known state or reboot the device."
+command: "*RST\n"

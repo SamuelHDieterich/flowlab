@@ -1,0 +1,12 @@
+name: Get module
+description: Returns the power module currently selected for remote commands. It returns 1 or 2. A command error is returned if only one module is installed.
+command: "CHAN?\n"
+response:
+  format: "{{module}}"
+  parameters:
+    - name: module
+      description: "The currently selected module (1 or 2)."
+      type: number
+      values:
+        - 1
+        - 2

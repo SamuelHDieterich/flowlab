@@ -1,0 +1,9 @@
+name: Get persistent switch heater state
+description: Returns the state of the persistent switch heater. If in Shim Mode, the status of the switch heater for the selected shim is returned.
+command: "PSHTR?\n"
+response:
+  format: "{{state}}"
+  parameters:
+    - name: state
+      description: "The state of the persistent switch heater."
+      type: boolean

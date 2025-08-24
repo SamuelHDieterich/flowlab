@@ -1,0 +1,19 @@
+name: Get display units
+description: Reports the display units of temperature used by the specific input channel.
+command:
+  format: "INPUT {{channel}}:UNITS?\n"
+  parameters:
+    - name: channel
+      description: "The channel identification, options include: number (example: 0), characther (example: A), or channel ID (example: CHA)."
+      type: string
+response:
+  format: "{{units}}"
+  parameters:
+    - name: units
+      description: "The display units of temperature for the specified channel."
+      type: string
+      values:
+        - K
+        - C
+        - F
+        - S

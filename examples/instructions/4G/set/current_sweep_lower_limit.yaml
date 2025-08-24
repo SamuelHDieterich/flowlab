@@ -1,0 +1,9 @@
+name: Set current sweep lower limit
+description: Sets the current limit used when the next SWEEP DOWN command is issued. The value must be supplied in the selected units - amperes or field (kG). An error will be returned if this value is greater than the upper sweep limit.
+command:
+  format: "LLIM {{limit}}\n"
+  parameters:
+    - name: limit
+      description: "The lower limit for the current sweep."
+      type: number
+      default: 0.0

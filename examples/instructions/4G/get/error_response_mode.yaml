@@ -1,0 +1,12 @@
+name: Get error response mode
+description: Returns the selected error reporting mode.
+command: "ERROR?\n"
+response:
+  format: "{{mode}}"
+  parameters:
+    - name: mode
+      description: 0 = disable error reporting, 1 = enable error reporting
+      type: number
+      values:
+        - 0
+        - 1

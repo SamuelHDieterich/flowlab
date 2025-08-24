@@ -1,0 +1,15 @@
+name: Get current sweep lower limit
+description: Returns the current limit used when the next SWEEP DOWN command is issued.
+command: "LLIM?\n"
+response:
+  format: "{{limit}} {{units}}"
+  parameters:
+    - name: limit
+      description: "The current lower limit for the sweep."
+      type: number
+    - name: units
+      description: "The units for the current lower limit."
+      type: string
+      values:
+        - A # Amperes
+        - kG # kiloGauss

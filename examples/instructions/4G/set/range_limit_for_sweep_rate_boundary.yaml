@@ -1,0 +1,17 @@
+name: Set range limit for sweep rate boundary
+description: Sets the upper limit for a charge rate range in amps.  Range 0 starts at zero and ends at the limit provided. Range 1 starts at the Range 0 limit and ends at the Range 1 limit provided. Range 2 starts at the Range 1 limit and ends at the Range 2 limit provided. Range 3 starts at the Range 2 limit and ends at the Range 3 limit provided. Range 4 starts at the Range 3 limit and ends at the supply output capacity.
+command:
+  format: "RANGE {{range}} {{limit}}\n"
+  parameters:
+    - name: range
+      description: Do not use any other value besides 0 unless you know what you are doing.
+      type: number
+      values:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+    - name: limit
+      description: Make sure to not set a limit that is greater than the maximum rate of the power supply.
+      type: number

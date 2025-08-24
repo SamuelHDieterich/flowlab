@@ -11,3 +11,5 @@ edition.workspace = true
 authors.workspace = true
 
 [dependencies]
+serde = { version = "1.0.219", features = ["derive"] }
+serde_yaml = "0.9.34"                                  # Deprecated, may use another YAML library in the future

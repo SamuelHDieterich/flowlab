@@ -1,0 +1,9 @@
+name: Get magnet coil name
+description: Returns the name of the magnet coil.
+command: "NAME?\n"
+response:
+  format: "{{name}}"
+  parameters:
+    - name: name
+      description: "The name of the magnet coil."
+      type: string
