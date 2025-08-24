@@ -3,9 +3,19 @@
 version = 4
 
 [[package]]
+name = "flowlab-client"
+version = "0.2.0"
+dependencies = [
+ "flowlab-core",
+]
+
+[[package]]
 name = "flowlab-core"
 version = "0.2.0"
 
 [[package]]
 name = "flowlab-server"
 version = "0.2.0"
+dependencies = [
+ "flowlab-core",
+]
