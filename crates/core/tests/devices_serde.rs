@@ -1,4 +1,4 @@
-use flowlab_core::devices::serde as devices;
+use flowlab_core::device::serde as devices;
 
 #[test]
 fn deserialize_device() {

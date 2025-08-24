@@ -1,2 +1,2 @@
-pub mod devices;
-pub mod instructions;
+pub mod device;
+pub mod instruction;

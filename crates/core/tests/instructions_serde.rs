@@ -1,4 +1,4 @@
-use flowlab_core::instructions::serde as instructions;
+use flowlab_core::instruction::serde as instructions;
 
 #[test]
 fn deserialize_instruction() {
